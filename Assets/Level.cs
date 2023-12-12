@@ -69,6 +69,7 @@ public class Level : MonoBehaviour
 
     public Canvas play_again_canvas;
     public Canvas try_again_canvas;
+    public Canvas solve_canvas;
 
     public Canvas main_canvas;
     public List<GameObject> createdGameObjs = new List<GameObject>();
@@ -87,6 +88,11 @@ public class Level : MonoBehaviour
     public int ExitSoundPlayed = 0;
 
     public Material grassMaterial;
+
+    public InputField answerInput;
+    public Text successText;
+
+    private int correctAnswer = 4;
 
 
     // feel free to put more fields here, if you need them e.g, add AudioClips that you can also reference them from other scripts
@@ -111,6 +117,7 @@ public class Level : MonoBehaviour
     {
         play_again_canvas.enabled = false;
         try_again_canvas.enabled = false;
+        solve_canvas.enabled = false;
         main_canvas.enabled = true;
         // InitializeLevel("start");
     }
@@ -1078,6 +1085,35 @@ public class Level : MonoBehaviour
         yield return new WaitForSeconds(1.0f);
     }
 
+    // public void SolveCanvas()
+    // {
+    //     solve_canvas.enabled = true;
+    //     // StartCoroutine(TryAgainCoroutine());
+    //     // recreateSameLevel();
+    // }
+
+    public void CheckAnswer()
+    {
+        int userAnswer;
+
+        if (int.TryParse(answerInput.text, out userAnswer))
+        {
+            if (userAnswer == correctAnswer)
+            {
+                successText.text = "Success! You got it right!";
+                PlayAgain();
+            }
+            else
+            {
+                successText.text = "Try again. Incorrect answer.";
+            }
+        }
+        else
+        {
+            successText.text = "Invalid input. Please enter a number.";
+        }
+    }
+
     private void recreateSameLevel(){
         InitializeLevel("tryAgain");
     }
@@ -1129,8 +1165,9 @@ public class Level : MonoBehaviour
             
             if (virus_landed_on_player_recently)
                 text_box.GetComponent<Text>().text = "Washed it off at home! Success!!!";
-            else
+            else{
                 text_box.GetComponent<Text>().text = "Success!!!";
+            }
             if (fps_player_obj != null){
                 Camera playerCam = fps_player_obj.GetComponentInChildren<Camera>();
                 if (playerCam != null)
@@ -1142,7 +1179,7 @@ public class Level : MonoBehaviour
             Object.Destroy(fps_player_obj);
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-            play_again_canvas.enabled = true;
+            solve_canvas.enabled = true;
             return;
         }
 
