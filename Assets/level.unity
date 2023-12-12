@@ -1935,7 +1935,7 @@ MonoBehaviour:
   storey_height: 2.5
   virus_speed: 3
   fps_prefab: {fileID: 1863613400}
-  virus_prefab: {fileID: 1752992853893934, guid: b24a09259ec34a44186fdcb616993efe,
+  virus_prefab: {fileID: 5889267320979916260, guid: 318830e16c9af9a449459f9b35ed0179,
     type: 3}
   water_prefab: {fileID: 100000, guid: 9485b0c79d11e2e4d0007da98d76c639, type: 3}
   house_prefab: {fileID: 100006, guid: bff9f12c2b78a19499683923993e62cc, type: 3}
