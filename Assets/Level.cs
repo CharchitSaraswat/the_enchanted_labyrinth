@@ -101,7 +101,8 @@ private    int numberOfDragons;
     public Material grassMaterial;
 
     public float virusMaxHeight = 0.0f;
-    public InputField answerInput;
+    // public InputField answerInput;
+
     public Text successText;
 
     private int correctAnswer = 4;
@@ -1185,27 +1186,27 @@ public int GetNumberOfDragons()
     //     // recreateSameLevel();
     // }
 
-    public void CheckAnswer()
-    {
-        int userAnswer;
+    // public void CheckAnswer()
+    // {
+    //     int userAnswer;
 
-        if (int.TryParse(answerInput.text, out userAnswer))
-        {
-            if (userAnswer == correctAnswer)
-            {
-                successText.text = "Success! You got it right!";
-                PlayAgain();
-            }
-            else
-            {
-                successText.text = "Try again. Incorrect answer.";
-            }
-        }
-        else
-        {
-            successText.text = "Invalid input. Please enter a number.";
-        }
-    }
+    //     if (int.TryParse(answerInput.text, out userAnswer))
+    //     {
+    //         if (userAnswer == correctAnswer)
+    //         {
+    //             successText.text = "Success! You got it right!";
+    //             PlayAgain();
+    //         }
+    //         else
+    //         {
+    //             successText.text = "Try again. Incorrect answer.";
+    //         }
+    //     }
+    //     else
+    //     {
+    //         successText.text = "Invalid input. Please enter a number.";
+    //     }
+    // }
 
     private void recreateSameLevel(){
         InitializeLevel("tryAgain");
