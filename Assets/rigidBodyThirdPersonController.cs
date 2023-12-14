@@ -11,7 +11,7 @@ public class SwordsmanController : MonoBehaviour
 
     float gravity = -9.81f;
     private Vector3 movement_direction;
-    // private bool isRunning = false;
+    private bool isRunning = false;
 
     public float velocity;
 
