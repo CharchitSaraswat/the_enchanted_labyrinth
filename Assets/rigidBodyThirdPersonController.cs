@@ -38,6 +38,7 @@ public class SwordsmanController : MonoBehaviour
     private float healthDeductionInterval = 0.25f;
 
     private float timer = 0.0f;
+    private bool isDying = false;
 
     void Start()
     {
@@ -122,103 +123,109 @@ public class SwordsmanController : MonoBehaviour
             cb.disabledColor = new Color(1.0f, 0.0f, 0.0f);
             scroll_bar.GetComponent<Scrollbar>().colors = cb;
         }
-        else if (player_health >= 50.0f)
+        else
         {
             ColorBlock cb = scroll_bar.GetComponent<Scrollbar>().colors;
             cb.disabledColor = new Color(0.0f, 1.0f, 0.25f);
             scroll_bar.GetComponent<Scrollbar>().colors = cb;
-        } else {
-            is_dead = true;
         }
-
-        if (!character_controller.isGrounded) {
-            movement_direction.y += gravity * Time.deltaTime;
-        } else {
-            movement_direction.y = 0.0f;
+        if (player_health <= 0.001f && !isDying)
+        {
+            isDying = true;
+            animator.SetTrigger("dead");
+            return;
         }
-        Vector3 moveVector = movement_direction * velocity * Time.deltaTime;
-
-        if (Input.GetKey(KeyCode.UpArrow) && Input.GetKey(KeyCode.LeftShift)) {
-            velocity = Mathf.Lerp(velocity, runSpeed / 2.0f, Time.deltaTime);
-            animator.SetBool("isWalking", false);
-            animator.SetBool("isRunning", true);
-            movement_direction = transform.TransformDirection(Vector3.forward);
-            character_controller.Move(moveVector);
-        }
-        else if (Input.GetKey(KeyCode.DownArrow) && Input.GetKey(KeyCode.LeftShift)) {
-            velocity = Mathf.Lerp(velocity, runSpeed / 2.0f, Time.deltaTime);
-            animator.SetBool("isWalking", false);
-            animator.SetBool("isRunning", true);
-            movement_direction = transform.TransformDirection(Vector3.back);
-            character_controller.Move(moveVector);
-        }
-        else if (Input.GetKey(KeyCode.UpArrow)){
-            velocity = Mathf.Lerp(velocity, walkSpeed / 2.0f, Time.deltaTime);
-            animator.SetBool("isWalking", true);
-            animator.SetBool("isRunning", false);
-            movement_direction = transform.TransformDirection(Vector3.forward);
-            character_controller.Move(moveVector);
-        }
-        else if (Input.GetKey(KeyCode.DownArrow)){
-            velocity = Mathf.Lerp(velocity, walkSpeed / 2.0f, Time.deltaTime);
-            animator.SetBool("isWalking", true);
-            animator.SetBool("isRunning", false);
-            movement_direction = transform.TransformDirection(Vector3.back);
-            character_controller.Move(moveVector);
-        }
-        else {
-            velocity = Mathf.Lerp(velocity, 0.0f, Time.deltaTime);
-            animator.SetBool("isWalking", false);
-            animator.SetBool("isRunning", false);
-            isWalking = false;
-            isRunning = false;
-            if (Input.GetKey(KeyCode.S)) {
-                // Debug.Log("Stab");
-                animator.SetTrigger("stab");
-                stab = true;
-                slash = false;
-                jab = false;
-                if (timer >= healthDeductionInterval)
-                {
-                    timer = 0.0f;
-                    PerformAttack();
-                }
+        if (!isDying)
+        {
+            if (!character_controller.isGrounded) {
+                movement_direction.y += gravity * Time.deltaTime;
+            } else {
+                movement_direction.y = 0.0f;
             }
-            else if (Input.GetKey(KeyCode.A)) {
-                // Debug.Log("Slash");
-                animator.SetTrigger("slash");
-                slash = true;
-                stab = false;
-                jab = false;
-                if (timer >= healthDeductionInterval)
-                {
-                    timer = 0.0f;
-                    PerformAttack();
-                }
+            Vector3 moveVector = movement_direction * velocity * Time.deltaTime;
+
+            if (Input.GetKey(KeyCode.UpArrow) && Input.GetKey(KeyCode.LeftShift)) {
+                velocity = Mathf.Lerp(velocity, runSpeed / 2.0f, Time.deltaTime);
+                animator.SetBool("isWalking", false);
+                animator.SetBool("isRunning", true);
+                movement_direction = transform.TransformDirection(Vector3.forward);
+                character_controller.Move(moveVector);
             }
-            else if (Input.GetKey(KeyCode.C)) {
-                // Debug.Log("Jab");
-                animator.SetTrigger("jab");
-                slash = false;
-                stab = false;
-                jab = true;
-                if (timer >= healthDeductionInterval)
-                {
-                    timer = 0.0f;
-                    PerformAttack();
-                }
+            else if (Input.GetKey(KeyCode.DownArrow) && Input.GetKey(KeyCode.LeftShift)) {
+                velocity = Mathf.Lerp(velocity, runSpeed / 2.0f, Time.deltaTime);
+                animator.SetBool("isWalking", false);
+                animator.SetBool("isRunning", true);
+                movement_direction = transform.TransformDirection(Vector3.back);
+                character_controller.Move(moveVector);
+            }
+            else if (Input.GetKey(KeyCode.UpArrow)){
+                velocity = Mathf.Lerp(velocity, walkSpeed / 2.0f, Time.deltaTime);
+                animator.SetBool("isWalking", true);
+                animator.SetBool("isRunning", false);
+                movement_direction = transform.TransformDirection(Vector3.forward);
+                character_controller.Move(moveVector);
+            }
+            else if (Input.GetKey(KeyCode.DownArrow)){
+                velocity = Mathf.Lerp(velocity, walkSpeed / 2.0f, Time.deltaTime);
+                animator.SetBool("isWalking", true);
+                animator.SetBool("isRunning", false);
+                movement_direction = transform.TransformDirection(Vector3.back);
+                character_controller.Move(moveVector);
             }
             else {
-                stab = false;
-                slash = false;
-                jab = false;
+                velocity = Mathf.Lerp(velocity, 0.0f, Time.deltaTime);
+                animator.SetBool("isWalking", false);
+                animator.SetBool("isRunning", false);
+                isWalking = false;
+                isRunning = false;
+                if (Input.GetKey(KeyCode.S)) {
+                    // Debug.Log("Stab");
+                    animator.SetTrigger("stab");
+                    stab = true;
+                    slash = false;
+                    jab = false;
+                    if (timer >= healthDeductionInterval)
+                    {
+                        timer = 0.0f;
+                        PerformAttack();
+                    }
+                }
+                else if (Input.GetKey(KeyCode.A)) {
+                    // Debug.Log("Slash");
+                    animator.SetTrigger("slash");
+                    slash = true;
+                    stab = false;
+                    jab = false;
+                    if (timer >= healthDeductionInterval)
+                    {
+                        timer = 0.0f;
+                        PerformAttack();
+                    }
+                }
+                else if (Input.GetKey(KeyCode.C)) {
+                    // Debug.Log("Jab");
+                    animator.SetTrigger("jab");
+                    slash = false;
+                    stab = false;
+                    jab = true;
+                    if (timer >= healthDeductionInterval)
+                    {
+                        timer = 0.0f;
+                        PerformAttack();
+                    }
+                }
+                else {
+                    stab = false;
+                    slash = false;
+                    jab = false;
+                }
             }
-        }
 
-        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow))
-        {
-            float rotationSpeed = 100.0f;
-            transform.Rotate(0, (Input.GetKey(KeyCode.RightArrow) ? 1 : -1) * rotationSpeed * Time.deltaTime, 0);
+            if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow))
+            {
+                float rotationSpeed = 100.0f;
+                transform.Rotate(0, (Input.GetKey(KeyCode.RightArrow) ? 1 : -1) * rotationSpeed * Time.deltaTime, 0);
+            }
         }
     }
 }
