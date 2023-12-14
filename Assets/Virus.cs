@@ -11,15 +11,27 @@ public class Virus : MonoBehaviour
     private Level level;
     private float radius_of_search_for_player = 15.0f;
     private float virus_speed;
-
+    private SwordsmanController littleSoldier;
     private float storey_height;
     private Animator animator;
-    private float maxHeight;
+    public float maxHeight;
+    public float virus_health = 100.0f;
+    public float attack_radius = 1.0f;
+    public float damagePerAttack = 1.0f;
+
+    private float healthDeductionInterval = 0.5f;
+
+    private float timer = 0.0f;
+
 
 	void Start ()
     {
         GameObject level_obj = GameObject.FindGameObjectWithTag("Level");
         level = level_obj.GetComponent<Level>();
+
+        GameObject littleSoldier_obj = GameObject.FindGameObjectWithTag("Player");
+        littleSoldier = littleSoldier_obj.GetComponent<SwordsmanController>();
+
         if (level == null)
         {
             Debug.LogError("Internal error: could not find the Level object - did you remove its 'Level' tag?");
@@ -30,6 +42,7 @@ public class Virus : MonoBehaviour
     //    radius_of_search_for_player = (bounds.size.x + bounds.size.z) / 5.0f;
         virus_speed = level.virus_speed;
         storey_height = level.storey_height;
+
         maxHeight = storey_height / 15.0f;
 
         animator = GetComponent<Animator>();
@@ -44,12 +57,19 @@ public class Virus : MonoBehaviour
         fps_player_obj = newPlayerObj;
     }
 
-   
-
     void Update()
-{
-    if (level.player_health < 0.001f || level.player_entered_house || fps_player_obj == null)
-        return;
+    {
+        if (littleSoldier.player_health < 0.001f || level.player_entered_house || fps_player_obj == null)
+            return;
+        // Debug.Log("Virus health: " + virus_health);
+        if (virus_health < 0.001f)
+        {
+            Destroy(gameObject);
+            return;
+        }
+    
+        timer += Time.deltaTime;
+
 
     // Existing code for color and scale animations...
     // Color redness = new Color
@@ -60,55 +80,66 @@ public class Virus : MonoBehaviour
         transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
        
 
-    if (radius_of_search_for_player > Vector3.Distance(transform.position, fps_player_obj.transform.position))
-    {
-        // Calculate direction towards the player
-        Vector3 moveDir = (fps_player_obj.transform.position - transform.position);
-        moveDir.y = 0; // Keeping y-axis fixed to avoid tilting
-        moveDir = moveDir.normalized;
+        float distanceToPlayer = Vector3.Distance(transform.position, fps_player_obj.transform.position);
 
-        // Rotate towards the player
-        Quaternion targetRotation = Quaternion.LookRotation(moveDir);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, virus_speed * Time.deltaTime);
-
-        // Check if the NPC is facing the player before moving
-        if (Quaternion.Angle(transform.rotation, targetRotation) < 1.0f)
-        {   animator.SetBool("isFlyingForward", true);
+        if (distanceToPlayer <= attack_radius ) {
+            animator.SetBool("isFlyingForward", false);
             animator.SetBool("isFireballShoot", true);
-            Vector3 nextPos = transform.position + moveDir * virus_speed * Time.deltaTime;
-            nextPos.y = Mathf.Min(nextPos.y, maxHeight);
+            if (timer >= healthDeductionInterval)
+            {
+                timer = 0.0f;
+                littleSoldier.player_health -= damagePerAttack;
+            }
+        }
+        else if (radius_of_search_for_player > distanceToPlayer)
+        {
+            // Calculate direction towards the player
+            Vector3 moveDir = (fps_player_obj.transform.position - transform.position);
+            moveDir.y = 0; // Keeping y-axis fixed to avoid tilting
+            moveDir = moveDir.normalized;
 
-            // Apply the new position
-            transform.position = nextPos;
+            // Rotate towards the player
+            Quaternion targetRotation = Quaternion.LookRotation(moveDir);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, virus_speed * Time.deltaTime);
+
+            // Check if the NPC is facing the player before moving
+            if (Quaternion.Angle(transform.rotation, targetRotation) < 1.0f)
+            {   animator.SetBool("isFlyingForward", true);
+                animator.SetBool("isFireballShoot", true);
+                Vector3 nextPos = transform.position + moveDir * virus_speed * Time.deltaTime;
+                nextPos.y = Mathf.Min(nextPos.y, maxHeight);
+
+                // Apply the new position
+                transform.position = nextPos;
+            }
+            else
+                {
+                    // NPC is not yet facing the player, stop the fly forward animation
+                    animator.SetBool("isFlyingForward", false);
+                    animator.SetBool("isFireballShoot", false);
+                }
         }
         else
             {
-                // NPC is not yet facing the player, stop the fly forward animation
+                // NPC is outside the search radius, stop the fly forward animation
                 animator.SetBool("isFlyingForward", false);
                 animator.SetBool("isFireballShoot", false);
             }
+
+        transform.position = new Vector3(transform.position.x, Mathf.Min(transform.position.y, maxHeight), transform.position.z);
     }
-     else
-        {
-            // NPC is outside the search radius, stop the fly forward animation
-            animator.SetBool("isFlyingForward", false);
-            animator.SetBool("isFireballShoot", false);
-        }
-
-    transform.position = new Vector3(transform.position.x, Mathf.Min(transform.position.y, maxHeight), transform.position.z);
-}
 
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.name == "PLAYER")
-        {
-            if (!level.virus_landed_on_player_recently)
-                level.timestamp_virus_landed = Time.time;
-            level.num_virus_hit_concurrently++;
-            level.virus_landed_on_player_recently = true;
-            Destroy(gameObject);
-        }
-    }
+    // private void OnCollisionEnter(Collision collision)
+    // {
+    //     if (collision.gameObject.name == "PLAYER")
+    //     {
+    //         if (!level.virus_landed_on_player_recently)
+    //             level.timestamp_virus_landed = Time.time;
+    //         level.num_virus_hit_concurrently++;
+    //         level.virus_landed_on_player_recently = true;
+    //         Destroy(gameObject);
+    //     }
+    // }
     
 }

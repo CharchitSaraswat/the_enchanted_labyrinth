@@ -34,6 +34,15 @@ public class Drug : MonoBehaviour
     {
         if (collision.gameObject.name == "PLAYER")
         {
+            SwordsmanController swordsmanController = collision.gameObject.GetComponent<SwordsmanController>();
+            if (swordsmanController != null)
+            {
+                swordsmanController.player_health += Random.Range(5, 20);
+                if (swordsmanController.player_health >= 100.0f)
+                {
+                    swordsmanController.player_health = 100.0f;
+                }
+            }
             Debug.Log("Drug collided with " + collision.gameObject.name);
             level.drug_landed_on_player_recently = true;
             Destroy(gameObject);

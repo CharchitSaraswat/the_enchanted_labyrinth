@@ -48,7 +48,7 @@ public class Level : MonoBehaviour
     public GameObject gem_prefab;
     public Text displayEquation;
     public GameObject text_box;
-    public GameObject scroll_bar;
+    // public GameObject scroll_bar;
 
     private int coefficient_of_gems; //a
 private int number_of_gems; //x
@@ -100,6 +100,7 @@ private    int numberOfDragons;
 
     public Material grassMaterial;
 
+    public float virusMaxHeight = 0.0f;
     public InputField answerInput;
     public Text successText;
 
@@ -1052,6 +1053,10 @@ public int GetNumberOfDragons()
                     virus.transform.position = new Vector3(x + 0.5f, y + Random.Range(1.0f, storey_height / 2.0f), z + 0.5f);
 
                     virus.AddComponent<Virus>();
+                    Virus virusScript = virus.GetComponent<Virus>();
+                    virusScript.maxHeight = storey_height / 4.0f;
+                    virusMaxHeight = storey_height / 4.0f;
+
                     virus.GetComponent<Rigidbody>().mass = 10000;
                     ObjectData virusData = new ObjectData("Virus", virus.transform.position, virus.transform.rotation, virus.transform.localScale);
                     objDetails.Add(virusData);
@@ -1277,31 +1282,31 @@ public int GetNumberOfDragons()
         }
 
         // virus hits the players (boolean variable is manipulated by Virus.cs)
-        if (virus_landed_on_player_recently)
-        {
-            PlaySoundWithLimit(virus_sound, 1.5f);
-            float time_since_virus_landed = Time.time - timestamp_virus_landed;
-            if (time_since_virus_landed > 5.0f)
-            {
-                player_health -= Random.Range(0.25f, 0.5f) * (float)num_virus_hit_concurrently;
-                player_health = Mathf.Max(player_health, 0.0f);
-                if (num_virus_hit_concurrently > 1)
-                    text_box.GetComponent<Text>().text = "Ouch! Infected by " + num_virus_hit_concurrently + " viruses";
-                else
-                    text_box.GetComponent<Text>().text = "Ouch! Infected by a virus";
-                timestamp_last_msg = Time.time;
-                timestamp_virus_landed = float.MaxValue;
-                virus_landed_on_player_recently = false;
-                num_virus_hit_concurrently = 0;
-            }
-            else
-            {
-                if (num_virus_hit_concurrently == 1)
-                    text_box.GetComponent<Text>().text = "A virus landed on you. Infection in " + (5.0f - time_since_virus_landed).ToString("0.0") + " seconds. Find water or drug!";
-                else
-                    text_box.GetComponent<Text>().text = num_virus_hit_concurrently + " viruses landed on you. Infection in " + (5.0f - time_since_virus_landed).ToString("0.0") + " seconds. Find water or drug!";
-            }
-        }
+        // if (virus_landed_on_player_recently)
+        // {
+        //     PlaySoundWithLimit(virus_sound, 1.5f);
+        //     float time_since_virus_landed = Time.time - timestamp_virus_landed;
+        //     if (time_since_virus_landed > 5.0f)
+        //     {
+        //         player_health -= Random.Range(0.25f, 0.5f) * (float)num_virus_hit_concurrently;
+        //         player_health = Mathf.Max(player_health, 0.0f);
+        //         if (num_virus_hit_concurrently > 1)
+        //             text_box.GetComponent<Text>().text = "Ouch! Infected by " + num_virus_hit_concurrently + " viruses";
+        //         else
+        //             text_box.GetComponent<Text>().text = "Ouch! Infected by a virus";
+        //         timestamp_last_msg = Time.time;
+        //         timestamp_virus_landed = float.MaxValue;
+        //         virus_landed_on_player_recently = false;
+        //         num_virus_hit_concurrently = 0;
+        //     }
+        //     else
+        //     {
+        //         if (num_virus_hit_concurrently == 1)
+        //             text_box.GetComponent<Text>().text = "A virus landed on you. Infection in " + (5.0f - time_since_virus_landed).ToString("0.0") + " seconds. Find water or drug!";
+        //         else
+        //             text_box.GetComponent<Text>().text = num_virus_hit_concurrently + " viruses landed on you. Infection in " + (5.0f - time_since_virus_landed).ToString("0.0") + " seconds. Find water or drug!";
+        //     }
+        // }
 
         // drug picked by the player  (boolean variable is manipulated by Drug.cs)
         if (drug_landed_on_player_recently)
@@ -1321,31 +1326,31 @@ public int GetNumberOfDragons()
         }
 
         // splashed on water  (boolean variable is manipulated by Water.cs)
-        if (player_is_on_water)
-        {   Debug.Log("payer is on water");
-            PlaySoundWithLimit(water_sound, 1.5f);
-            if (virus_landed_on_player_recently)
-                text_box.GetComponent<Text>().text = "Phew! Washed it off!";
-            timestamp_last_msg = Time.time;
-            timestamp_virus_landed = float.MaxValue;
-            virus_landed_on_player_recently = false;
-            num_virus_hit_concurrently = 0;
-        }
+        // if (player_is_on_water)
+        // {
+        //     PlaySoundWithLimit(water_sound, 1.5f);
+        //     if (virus_landed_on_player_recently)
+        //         text_box.GetComponent<Text>().text = "Phew! Washed it off!";
+        //     timestamp_last_msg = Time.time;
+        //     timestamp_virus_landed = float.MaxValue;
+        //     virus_landed_on_player_recently = false;
+        //     num_virus_hit_concurrently = 0;
+        // }
 
         // update scroll bar (not a very conventional manner to create a health bar, but whatever)
-        scroll_bar.GetComponent<Scrollbar>().size = player_health;
-        if (player_health < 0.5f)
-        {
-            ColorBlock cb = scroll_bar.GetComponent<Scrollbar>().colors;
-            cb.disabledColor = new Color(1.0f, 0.0f, 0.0f);
-            scroll_bar.GetComponent<Scrollbar>().colors = cb;
-        }
-        else
-        {
-            ColorBlock cb = scroll_bar.GetComponent<Scrollbar>().colors;
-            cb.disabledColor = new Color(0.0f, 1.0f, 0.25f);
-            scroll_bar.GetComponent<Scrollbar>().colors = cb;
-        }
+        // scroll_bar.GetComponent<Scrollbar>().size = player_health;
+        // if (player_health < 0.5f)
+        // {
+        //     ColorBlock cb = scroll_bar.GetComponent<Scrollbar>().colors;
+        //     cb.disabledColor = new Color(1.0f, 0.0f, 0.0f);
+        //     scroll_bar.GetComponent<Scrollbar>().colors = cb;
+        // }
+        // else
+        // {
+        //     ColorBlock cb = scroll_bar.GetComponent<Scrollbar>().colors;
+        //     cb.disabledColor = new Color(0.0f, 1.0f, 0.25f);
+        //     scroll_bar.GetComponent<Scrollbar>().colors = cb;
+        // }
 
         
     }

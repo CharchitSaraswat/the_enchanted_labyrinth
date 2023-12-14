@@ -25,7 +25,17 @@ public class Water : MonoBehaviour
     { Debug.Log("t");
         if (other.gameObject.name == "PLAYER")
         {
+            SwordsmanController swordsmanController = other.GetComponent<SwordsmanController>();
+            if (swordsmanController != null)
+            {
+                swordsmanController.player_health -= Random.Range(5, 20);
+                if (swordsmanController.player_health <= 0)
+                {
+                    swordsmanController.player_health = 0;
+                }
+            }
             level.player_is_on_water = true;
+            level.player_health -= Random.Range(0.05f, 0.2f);
         }
     }
 
