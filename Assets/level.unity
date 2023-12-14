@@ -1822,7 +1822,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 189742, guid: ec948f8e0c2ff154f8d8ab7b12efce49, type: 3}
       propertyPath: m_TagString
-      value: Untagged
+      value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 456938, guid: ec948f8e0c2ff154f8d8ab7b12efce49, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1884,6 +1884,11 @@ PrefabInstance:
       propertyPath: m_IncludeLayers.m_Bits
       value: 4294967295
       objectReference: {fileID: 0}
+    - target: {fileID: 6946120330867390323, guid: ec948f8e0c2ff154f8d8ab7b12efce49,
+        type: 3}
+      propertyPath: scroll_bar
+      value: 
+      objectReference: {fileID: 756415155}
     m_RemovedComponents:
     - {fileID: 7833482639768803429, guid: ec948f8e0c2ff154f8d8ab7b12efce49, type: 3}
     - {fileID: 0}
@@ -1937,11 +1942,11 @@ MonoBehaviour:
   fps_prefab: {fileID: 1863613400}
   virus_prefab: {fileID: 5889267320979916260, guid: 318830e16c9af9a449459f9b35ed0179,
     type: 3}
-  water_prefab: {fileID: 100000, guid: 9485b0c79d11e2e4d0007da98d76c639, type: 3}
+  water_prefab: {fileID: 1725317912486240, guid: e55149ba6f4d00741984987e258c3378,
+    type: 3}
   house_prefab: {fileID: 100006, guid: bff9f12c2b78a19499683923993e62cc, type: 3}
   gem_prefab: {fileID: 1000010880751780, guid: c3c0707254334a64ca8198f7486e977d, type: 3}
   text_box: {fileID: 1231343217}
-  scroll_bar: {fileID: 756415155}
   play_again_canvas: {fileID: 416381641}
   try_again_canvas: {fileID: 265277815}
   main_canvas: {fileID: 1319284530}
