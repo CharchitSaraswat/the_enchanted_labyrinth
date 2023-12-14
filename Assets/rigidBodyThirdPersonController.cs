@@ -86,6 +86,7 @@ public class SwordsmanController : MonoBehaviour
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRadius);
         foreach (var hitCollider in hitColliders)
         {
+            Debug.Log("Hit name: " + hitCollider.name);
             if (hitCollider.name == "COVID")
             {
                 // Calculate direction from player to the potential target

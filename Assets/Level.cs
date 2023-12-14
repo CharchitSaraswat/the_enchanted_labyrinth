@@ -1113,17 +1113,17 @@ public int GetNumberOfDragons()
                     // objDetails.Add(waterData);
                     // createdGameObjs.Add(water);
 
-                    // GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    // cube.name = "WATER_BOX";
-                    // cube.transform.localScale = new Vector3(bounds.size[0] / (float)width, storey_height / 20.0f, bounds.size[2] / (float)length);
-                    // cube.transform.position = new Vector3(x + 0.5f, y, z + 0.5f);
-                    // cube.GetComponent<Renderer>().material.color = Color.grey;
-                    // cube.GetComponent<BoxCollider>().size = new Vector3(1.1f, 20.0f * storey_height, 1.1f);
-                    // cube.GetComponent<BoxCollider>().isTrigger = true;
-                    // cube.AddComponent<Water>();
-                    // ObjectData WaterBoxData = new ObjectData("WaterBox", cube.transform.position, cube.transform.rotation, cube.transform.localScale);
-                    // objDetails.Add(WaterBoxData);
-                    // createdGameObjs.Add(cube);
+                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    cube.name = "WATER_BOX";
+                    cube.transform.localScale = new Vector3(bounds.size[0] / (float)width, storey_height / 20.0f, bounds.size[2] / (float)length);
+                    cube.transform.position = new Vector3(x + 0.5f, y, z + 0.5f);
+                    cube.GetComponent<Renderer>().material.color = Color.grey;
+                    cube.GetComponent<BoxCollider>().size = new Vector3(1.1f, 20.0f * storey_height, 1.1f);
+                    cube.GetComponent<BoxCollider>().isTrigger = true;
+                    cube.AddComponent<Water>();
+                    ObjectData WaterBoxData = new ObjectData("WaterBox", cube.transform.position, cube.transform.rotation, cube.transform.localScale);
+                    objDetails.Add(WaterBoxData);
+                    createdGameObjs.Add(cube);
                 }
             }
         }
