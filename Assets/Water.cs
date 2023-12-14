@@ -22,7 +22,7 @@ public class Water : MonoBehaviour
     }
 
     private void OnTriggerEnter(Collider other)
-    {
+    { Debug.Log("t");
         if (other.gameObject.name == "PLAYER")
         {
             level.player_is_on_water = true;
@@ -37,3 +37,4 @@ public class Water : MonoBehaviour
         }
     }
 }
+

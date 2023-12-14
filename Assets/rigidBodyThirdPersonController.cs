@@ -10,14 +10,11 @@ public class SwordsmanController : MonoBehaviour
 
     float gravity = -9.81f;
     private Vector3 movement_direction;
-    private bool isRunning = false;
+    // private bool isRunning = false;
 
     public float velocity;
 
-    private bool isWalking = false;
-    private bool stab = false;
-    private bool slash = false;
-    private bool jab = false;
+    // private bool isWalking = false;
 
     void Start()
     {
@@ -37,17 +34,12 @@ public class SwordsmanController : MonoBehaviour
         Vector3 moveVector = movement_direction * velocity * Time.deltaTime;
 
         // print character position
-        // Debug.Log("Character position: " + transform.position);
+        Debug.Log("Character position: " + transform.position);
 
         if (Input.GetKey(KeyCode.UpArrow) && Input.GetKey(KeyCode.LeftShift)) {
             velocity = Mathf.Lerp(velocity, runSpeed / 2.0f, Time.deltaTime);
             animator.SetBool("isWalking", false);
             animator.SetBool("isRunning", true);
-            isWalking = false;
-            isRunning = true;
-            stab = false;
-            slash = false;
-            jab = false;
             movement_direction = transform.TransformDirection(Vector3.forward);
             character_controller.Move(moveVector);
         }
@@ -55,11 +47,6 @@ public class SwordsmanController : MonoBehaviour
             velocity = Mathf.Lerp(velocity, runSpeed / 2.0f, Time.deltaTime);
             animator.SetBool("isWalking", false);
             animator.SetBool("isRunning", true);
-            isWalking = false;
-            isRunning = true;
-            stab = false;
-            slash = false;
-            jab = false;
             movement_direction = transform.TransformDirection(Vector3.back);
             character_controller.Move(moveVector);
         }
@@ -67,11 +54,6 @@ public class SwordsmanController : MonoBehaviour
             velocity = Mathf.Lerp(velocity, walkSpeed / 2.0f, Time.deltaTime);
             animator.SetBool("isWalking", true);
             animator.SetBool("isRunning", false);
-            isWalking = true;
-            isRunning = false;
-            stab = false;
-            slash = false;
-            jab = false;
             movement_direction = transform.TransformDirection(Vector3.forward);
             character_controller.Move(moveVector);
         }
@@ -79,11 +61,6 @@ public class SwordsmanController : MonoBehaviour
             velocity = Mathf.Lerp(velocity, walkSpeed / 2.0f, Time.deltaTime);
             animator.SetBool("isWalking", true);
             animator.SetBool("isRunning", false);
-            isWalking = true;
-            isRunning = false;
-            stab = false;
-            slash = false;
-            jab = false;
             movement_direction = transform.TransformDirection(Vector3.back);
             character_controller.Move(moveVector);
         }
@@ -91,35 +68,6 @@ public class SwordsmanController : MonoBehaviour
             velocity = Mathf.Lerp(velocity, 0.0f, Time.deltaTime);
             animator.SetBool("isWalking", false);
             animator.SetBool("isRunning", false);
-            isWalking = false;
-            isRunning = false;
-            if (Input.GetKey(KeyCode.S)) {
-                Debug.Log("Stab");
-                animator.SetTrigger("stab");
-                stab = true;
-                slash = false;
-                jab = false;
-            }
-            else if (Input.GetKey(KeyCode.A)) {
-                Debug.Log("Slash");
-                animator.SetTrigger("slash");
-                slash = true;
-                stab = false;
-                jab = false;
-            }
-            else if (Input.GetKey(KeyCode.C)) {
-                Debug.Log("Jab");
-                animator.SetTrigger("jab");
-                slash = false;
-                stab = false;
-                jab = true;
-            }
-            else {
-                Debug.Log("Idle");
-                stab = false;
-                slash = false;
-                jab = false;
-            }
         }
 
         if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow))
