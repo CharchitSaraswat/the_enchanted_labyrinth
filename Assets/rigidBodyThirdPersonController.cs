@@ -11,7 +11,7 @@ public class SwordsmanController : MonoBehaviour
 
     float gravity = -9.81f;
     private Vector3 movement_direction;
-    private bool isRunning = false;
+    // private bool isRunning = false;
 
     public float velocity;
 
@@ -141,11 +141,6 @@ public class SwordsmanController : MonoBehaviour
             velocity = Mathf.Lerp(velocity, runSpeed / 2.0f, Time.deltaTime);
             animator.SetBool("isWalking", false);
             animator.SetBool("isRunning", true);
-            isWalking = false;
-            isRunning = true;
-            stab = false;
-            slash = false;
-            jab = false;
             movement_direction = transform.TransformDirection(Vector3.forward);
             character_controller.Move(moveVector);
         }
@@ -153,11 +148,6 @@ public class SwordsmanController : MonoBehaviour
             velocity = Mathf.Lerp(velocity, runSpeed / 2.0f, Time.deltaTime);
             animator.SetBool("isWalking", false);
             animator.SetBool("isRunning", true);
-            isWalking = false;
-            isRunning = true;
-            stab = false;
-            slash = false;
-            jab = false;
             movement_direction = transform.TransformDirection(Vector3.back);
             character_controller.Move(moveVector);
         }
@@ -165,11 +155,6 @@ public class SwordsmanController : MonoBehaviour
             velocity = Mathf.Lerp(velocity, walkSpeed / 2.0f, Time.deltaTime);
             animator.SetBool("isWalking", true);
             animator.SetBool("isRunning", false);
-            isWalking = true;
-            isRunning = false;
-            stab = false;
-            slash = false;
-            jab = false;
             movement_direction = transform.TransformDirection(Vector3.forward);
             character_controller.Move(moveVector);
         }
@@ -177,11 +162,6 @@ public class SwordsmanController : MonoBehaviour
             velocity = Mathf.Lerp(velocity, walkSpeed / 2.0f, Time.deltaTime);
             animator.SetBool("isWalking", true);
             animator.SetBool("isRunning", false);
-            isWalking = true;
-            isRunning = false;
-            stab = false;
-            slash = false;
-            jab = false;
             movement_direction = transform.TransformDirection(Vector3.back);
             character_controller.Move(moveVector);
         }

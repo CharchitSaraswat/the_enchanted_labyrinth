@@ -22,7 +22,7 @@ public class Water : MonoBehaviour
     }
 
     private void OnTriggerEnter(Collider other)
-    {
+    { Debug.Log("t");
         if (other.gameObject.name == "PLAYER")
         {
             SwordsmanController swordsmanController = other.GetComponent<SwordsmanController>();
@@ -47,3 +47,4 @@ public class Water : MonoBehaviour
         }
     }
 }
+

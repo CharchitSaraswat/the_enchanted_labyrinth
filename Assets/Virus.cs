@@ -9,7 +9,7 @@ public class Virus : MonoBehaviour
 {
     private GameObject fps_player_obj;
     private Level level;
-    private float radius_of_search_for_player;
+    private float radius_of_search_for_player = 15.0f;
     private float virus_speed;
     private SwordsmanController littleSoldier;
     private float storey_height;
@@ -39,9 +39,11 @@ public class Virus : MonoBehaviour
         }
         fps_player_obj = level.fps_player_obj;
         Bounds bounds = level.GetComponent<Collider>().bounds;
-        radius_of_search_for_player = (bounds.size.x + bounds.size.z) / 5.0f;
+    //    radius_of_search_for_player = (bounds.size.x + bounds.size.z) / 5.0f;
         virus_speed = level.virus_speed;
         storey_height = level.storey_height;
+
+        maxHeight = storey_height / 15.0f;
 
         animator = GetComponent<Animator>();
         if (animator == null)
@@ -54,7 +56,6 @@ public class Virus : MonoBehaviour
     {
         fps_player_obj = newPlayerObj;
     }
-
 
     void Update()
     {
@@ -69,7 +70,15 @@ public class Virus : MonoBehaviour
     
         timer += Time.deltaTime;
 
-        transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+
+    // Existing code for color and scale animations...
+    // Color redness = new Color
+    //     {
+    //         r = Mathf.Max(1.0f, 0.25f + Mathf.Abs(Mathf.Sin(2.0f * Time.time)))
+    //     };
+        
+        transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+       
 
         float distanceToPlayer = Vector3.Distance(transform.position, fps_player_obj.transform.position);
 

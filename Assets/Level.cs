@@ -5,6 +5,8 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.IO;
+using UnityEngine.Assertions;
 
 enum TileType
 {
@@ -44,9 +46,18 @@ public class Level : MonoBehaviour
     public GameObject water_prefab;
     public GameObject house_prefab;
     public GameObject gem_prefab;
-
+    public Text displayEquation;
     public GameObject text_box;
     // public GameObject scroll_bar;
+
+    private int coefficient_of_gems; //a
+private int number_of_gems; //x
+private int coefficient_of_dragons; //b
+private int number_of_dragons; //y
+private int result;
+private int numberOfGems;
+private    int numberOfDragons;
+    
 
     // fields/variables accessible from other scripts
     internal GameObject fps_player_obj;   // instance of FPS template
@@ -69,6 +80,7 @@ public class Level : MonoBehaviour
 
     public Canvas play_again_canvas;
     public Canvas try_again_canvas;
+    public Canvas solve_canvas;
 
     public Canvas main_canvas;
     public List<GameObject> createdGameObjs = new List<GameObject>();
@@ -89,11 +101,67 @@ public class Level : MonoBehaviour
     public Material grassMaterial;
 
     public float virusMaxHeight = 0.0f;
+    public InputField answerInput;
+    public Text successText;
+
+    private int correctAnswer = 4;
+
 
     // feel free to put more fields here, if you need them e.g, add AudioClips that you can also reference them from other scripts
     // for sound, make also sure that you have ONE audio listener active (either the listener in the FPS or the main camera, switch accordingly)
 
     // a helper function that randomly shuffles the elements of a list (useful to randomize the solution to the CSP)
+
+// private string LoadTextFromFile(string filePath)
+// {
+//     if (File.Exists(filePath))
+//     {
+//         return File.ReadAllText(filePath);
+//     }
+//     else
+//     {
+//         Debug.LogError("Cannot find file at " + filePath);
+//         return "";
+//     }
+// }
+
+
+private void GenerateAndDisplayEquation()
+{
+    // Set the range for the random numbers
+    int min = 1; // Example minimum value
+    int max = 10; // Example maximum value
+    numberOfGems = GetNumberOfGems();
+    numberOfDragons = GetNumberOfDragons();
+    // Assign random numbers to the variables
+    coefficient_of_gems = Random.Range(min, max + 1);
+    number_of_gems = Random.Range(min, numberOfGems+1); //change
+    coefficient_of_dragons = Random.Range(min, max + 1);
+    number_of_dragons = Random.Range(min, numberOfDragons); //change
+     Debug.Log("coefficient_of_gems " + coefficient_of_gems);
+    Debug.Log("x " + number_of_gems );
+    Debug.Log("coefficient_of_dragons" + coefficient_of_dragons);
+    Debug.Log("y " + number_of_dragons);
+    // Debug.Log("Number of Gems: " + numberOfGems);
+    // Debug.Log("Number of Dragons: " + numberOfDragons);
+
+    // Calculate the result of the equation
+    result = coefficient_of_gems * number_of_gems + coefficient_of_dragons * number_of_dragons;
+    Assert.AreEqual(result, coefficient_of_gems * number_of_gems + coefficient_of_dragons * number_of_dragons, "The result does not match the expected value of a * x + b * y");
+    // Create the equation string
+    string equation = $"{coefficient_of_gems}x + {coefficient_of_dragons}y = {result}";
+
+    // Display the equation on the screen
+    if(displayEquation != null)
+    {
+        displayEquation.text = equation;
+    }
+    else
+    {
+        Debug.LogError("Equation Text not assigned in the Inspector");
+    }
+}
+
     private void Shuffle<T>(ref List<T> list)
     {
         int n = list.Count;
@@ -112,6 +180,7 @@ public class Level : MonoBehaviour
     {
         play_again_canvas.enabled = false;
         try_again_canvas.enabled = false;
+        solve_canvas.enabled = false;
         main_canvas.enabled = true;
         // InitializeLevel("start");
     }
@@ -122,10 +191,24 @@ public class Level : MonoBehaviour
     }
 
 
+public int GetNumberOfGems()
+{
+    
+    return objDetails.Count(obj => obj.ObjectType == "Capsule");
+}
 
+public int GetNumberOfDragons()
+{
+    return objDetails.Count(obj => obj.ObjectType == "Virus"); 
+}
 
     public void InitializeLevel(string processType){
         // initialize internal/private variables
+        //  scoresFilePath = Path.Combine("/Users/somyaaaggarwal/Documents/Scores", scoresFileName);
+    //     string textToShow = LoadTextFromFile("/Users/somyaaaggarwal/Downloads/Equations.txt");
+    // displayEquation.text = textToShow;
+
+     
         virus_landed_on_player_recently = false;
         timestamp_virus_landed = float.MaxValue;
         drug_landed_on_player_recently = false;
@@ -289,7 +372,11 @@ public class Level : MonoBehaviour
             }
         }
         DrawDungeon(grid);
-
+   GenerateAndDisplayEquation();
+    numberOfGems = GetNumberOfGems();
+    numberOfDragons = GetNumberOfDragons();
+    Debug.Log("Number of Gems after initialize " + numberOfGems);
+    Debug.Log("Number of Dragons after initialize " + numberOfDragons);
         }
     }
 
@@ -828,7 +915,7 @@ public class Level : MonoBehaviour
                 // character is placed above the level so that in the beginning, he appears to fall down onto the maze
                 fps_player_obj.transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
                 // Print the player position
-                Debug.Log("Player position: " + fps_player_obj.transform.position);
+                //Debug.Log("Player position: " + fps_player_obj.transform.position);
                 fps_player_obj.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                 createdGameObjs.Add(fps_player_obj);
                 ObjectData fpsPlayerData = new ObjectData("FPSPlayer", fps_player_obj.transform.position, fps_player_obj.transform.rotation, fps_player_obj.transform.localScale);
@@ -1011,30 +1098,38 @@ public class Level : MonoBehaviour
                 {
                     GameObject water = Instantiate(water_prefab, new Vector3(0, 0, 0), Quaternion.identity);
                     water.name = "WATER";
-                    water.transform.localScale = new Vector3(0.5f * bounds.size[0] / (float)width, 1.0f, 0.5f * bounds.size[2] / (float)length);
+                    water.transform.localScale = new Vector3(1.0f * bounds.size[0] / (float)width, 6.0f, 1.0f * bounds.size[2] / (float)length);
                     water.transform.position = new Vector3(x + 0.5f, y + 0.1f, z + 0.5f);
                     ObjectData waterData = new ObjectData("Water", water.transform.position, water.transform.rotation, water.transform.localScale);
                     objDetails.Add(waterData);
                     createdGameObjs.Add(water);
 
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    cube.name = "WATER_BOX";
-                    cube.transform.localScale = new Vector3(bounds.size[0] / (float)width, storey_height / 20.0f, bounds.size[2] / (float)length);
-                    cube.transform.position = new Vector3(x + 0.5f, y, z + 0.5f);
-                    cube.GetComponent<Renderer>().material.color = Color.grey;
-                    cube.GetComponent<BoxCollider>().size = new Vector3(1.1f, 20.0f * storey_height, 1.1f);
-                    cube.GetComponent<BoxCollider>().isTrigger = true;
-                    cube.AddComponent<Water>();
-                    ObjectData WaterBoxData = new ObjectData("WaterBox", cube.transform.position, cube.transform.rotation, cube.transform.localScale);
-                    objDetails.Add(WaterBoxData);
-                    createdGameObjs.Add(cube);
+                    // GameObject water = Instantiate(water_prefab, new Vector3(0, 0, 0), Quaternion.identity);
+                    // water.name = "WATER";
+                    // water.transform.localScale = new Vector3( bounds.size[0] / (float)width, 1.0f, bounds.size[2] / (float)length);
+                    // water.transform.position = new Vector3(x + 0.5f, y + 0.1f, z + 0.5f);
+                    // ObjectData waterData = new ObjectData("Water", water.transform.position, water.transform.rotation, water.transform.localScale);
+                    // objDetails.Add(waterData);
+                    // createdGameObjs.Add(water);
+
+                    // GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    // cube.name = "WATER_BOX";
+                    // cube.transform.localScale = new Vector3(bounds.size[0] / (float)width, storey_height / 20.0f, bounds.size[2] / (float)length);
+                    // cube.transform.position = new Vector3(x + 0.5f, y, z + 0.5f);
+                    // cube.GetComponent<Renderer>().material.color = Color.grey;
+                    // cube.GetComponent<BoxCollider>().size = new Vector3(1.1f, 20.0f * storey_height, 1.1f);
+                    // cube.GetComponent<BoxCollider>().isTrigger = true;
+                    // cube.AddComponent<Water>();
+                    // ObjectData WaterBoxData = new ObjectData("WaterBox", cube.transform.position, cube.transform.rotation, cube.transform.localScale);
+                    // objDetails.Add(WaterBoxData);
+                    // createdGameObjs.Add(cube);
                 }
             }
         }
     }
 
 
-
+    
     // *** YOU NEED TO COMPLETE THIS PART OF THE FUNCTION JUST TO ADD SOUNDS ***
     // YOU MAY CHOOSE ANY SHORT SOUNDS (<2 sec) YOU WANT FOR A VIRUS HIT, A VIRUS INFECTION,
     // GETTING INTO THE WATER, AND REACHING THE EXIT
@@ -1081,6 +1176,35 @@ public class Level : MonoBehaviour
     {
         recreateSameLevel();
         yield return new WaitForSeconds(1.0f);
+    }
+
+    // public void SolveCanvas()
+    // {
+    //     solve_canvas.enabled = true;
+    //     // StartCoroutine(TryAgainCoroutine());
+    //     // recreateSameLevel();
+    // }
+
+    public void CheckAnswer()
+    {
+        int userAnswer;
+
+        if (int.TryParse(answerInput.text, out userAnswer))
+        {
+            if (userAnswer == correctAnswer)
+            {
+                successText.text = "Success! You got it right!";
+                PlayAgain();
+            }
+            else
+            {
+                successText.text = "Try again. Incorrect answer.";
+            }
+        }
+        else
+        {
+            successText.text = "Invalid input. Please enter a number.";
+        }
     }
 
     private void recreateSameLevel(){
@@ -1134,8 +1258,9 @@ public class Level : MonoBehaviour
             
             if (virus_landed_on_player_recently)
                 text_box.GetComponent<Text>().text = "Washed it off at home! Success!!!";
-            else
+            else{
                 text_box.GetComponent<Text>().text = "Success!!!";
+            }
             if (fps_player_obj != null){
                 Camera playerCam = fps_player_obj.GetComponentInChildren<Camera>();
                 if (playerCam != null)
@@ -1147,7 +1272,7 @@ public class Level : MonoBehaviour
             Object.Destroy(fps_player_obj);
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-            play_again_canvas.enabled = true;
+            solve_canvas.enabled = true;
             return;
         }
 
@@ -1227,7 +1352,7 @@ public class Level : MonoBehaviour
         //     scroll_bar.GetComponent<Scrollbar>().colors = cb;
         // }
 
-        /*** implement the rest ! */
+        
     }
 }
 
