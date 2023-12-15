@@ -2228,6 +2228,8 @@ MonoBehaviour:
   walkSpeed: 5
   runSpeed: 10
   velocity: 0
+  scroll_bar: {fileID: 0}
+  player_health: 100
 --- !u!136 &3064282237709490765
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -2248,9 +2250,9 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
-  m_Height: 1
+  m_Height: 2
   m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 1.66, z: 0}
 --- !u!143 &-349411613374446949
 CharacterController:
   m_ObjectHideFlags: 0
