@@ -2374,7 +2374,7 @@ PrefabInstance:
     - target: {fileID: -349411613374446949, guid: ec948f8e0c2ff154f8d8ab7b12efce49,
         type: 3}
       propertyPath: m_Height
-      value: 2.5
+      value: 2.6
       objectReference: {fileID: 0}
     - target: {fileID: -349411613374446949, guid: ec948f8e0c2ff154f8d8ab7b12efce49,
         type: 3}
@@ -2384,7 +2384,7 @@ PrefabInstance:
     - target: {fileID: -349411613374446949, guid: ec948f8e0c2ff154f8d8ab7b12efce49,
         type: 3}
       propertyPath: m_Center.y
-      value: 1.66
+      value: 1.7
       objectReference: {fileID: 0}
     - target: {fileID: -349411613374446949, guid: ec948f8e0c2ff154f8d8ab7b12efce49,
         type: 3}
@@ -2452,7 +2452,7 @@ PrefabInstance:
     - target: {fileID: 3064282237709490765, guid: ec948f8e0c2ff154f8d8ab7b12efce49,
         type: 3}
       propertyPath: m_Center.y
-      value: 1.66
+      value: 1.7
       objectReference: {fileID: 0}
     - target: {fileID: 3064282237709490765, guid: ec948f8e0c2ff154f8d8ab7b12efce49,
         type: 3}
@@ -2496,7 +2496,7 @@ GameObject:
   m_TagString: Level
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!114 &1919539187
 MonoBehaviour:

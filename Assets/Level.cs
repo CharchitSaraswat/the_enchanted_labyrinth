@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.IO;
 using UnityEngine.Assertions;
+using UnityEditor.AI;
 
 enum TileType
 {
@@ -186,9 +187,15 @@ private void GenerateAndDisplayEquation()
         // InitializeLevel("start");
     }
 
+    void BakeNavMesh()
+    {
+        NavMeshBuilder.BuildNavMesh();
+    }
+
     public void StartGame(){
         main_canvas.enabled = false;
         InitializeLevel("start");
+        // BakeNavMesh();
     }
 
 
@@ -1025,7 +1032,8 @@ public int GetNumberOfDragons()
                         house.transform.Rotate(0.0f, 90.0f, 0.0f);
                     else if (w == width - 1)
                         house.transform.Rotate(0.0f, 180.0f, 0.0f);
-
+                    house.layer = LayerMask.NameToLayer("NotWalkable");
+                    house.isStatic = true;
                     house.AddComponent<BoxCollider>();
                     house.GetComponent<BoxCollider>().isTrigger = true;
                     house.GetComponent<BoxCollider>().size = new Vector3(3.0f, 3.0f, 3.0f);
@@ -1042,6 +1050,8 @@ public int GetNumberOfDragons()
                     cube.transform.position = new Vector3(x + 0.5f, y + storey_height / 2.0f, z + 0.5f);
                     Material grassMaterial = Resources.Load<Material>("Stylize_Grass_diffuse");
                     cube.GetComponent<Renderer>().material = grassMaterial;
+                    cube.layer = LayerMask.NameToLayer("NotWalkable");
+                    cube.isStatic = true;
                     createdGameObjs.Add(cube);
                     ObjectData wallData = new ObjectData("Wall", cube.transform.position, cube.transform.rotation, cube.transform.localScale);
                     objDetails.Add(wallData);
@@ -1051,12 +1061,12 @@ public int GetNumberOfDragons()
                     GameObject virus = Instantiate(virus_prefab, new Vector3(0, 0, 0), Quaternion.identity);
                     virus.name = "COVID";
                     virus.transform.position = new Vector3(x + 0.5f, y + Random.Range(1.0f, storey_height / 2.0f), z + 0.5f);
-
+                    virus.layer = LayerMask.NameToLayer("Walkable");
+                    virus.isStatic = true;
                     // virus.AddComponent<Virus>();
                     Virus virusScript = virus.GetComponent<Virus>();
                     virusScript.maxHeight = storey_height / 4.0f;
                     virusMaxHeight = storey_height / 4.0f;
-
                     virus.GetComponent<Rigidbody>().mass = 10000;
                     ObjectData virusData = new ObjectData("Virus", virus.transform.position, virus.transform.rotation, virus.transform.localScale);
                     objDetails.Add(virusData);
@@ -1083,7 +1093,8 @@ public int GetNumberOfDragons()
                     capsule.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
                     capsule.transform.position = new Vector3(x, y + 1.0f, z);
                     capsule.transform.rotation = Quaternion.Euler(-90f, 45f, 0f);
-
+                    capsule.layer = LayerMask.NameToLayer("Walkable");
+                    capsule.isStatic = true;
                     Rigidbody rb = capsule.AddComponent<Rigidbody>();
                     rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
                     rb.useGravity = false;
@@ -1098,6 +1109,8 @@ public int GetNumberOfDragons()
                 {
                     GameObject water = Instantiate(water_prefab, new Vector3(0, 0, 0), Quaternion.identity);
                     water.name = "WATER";
+                    water.layer = LayerMask.NameToLayer("Walkable");
+                    water.isStatic = true;
                     water.transform.localScale = new Vector3(1.0f * bounds.size[0] / (float)width, 6.0f, 1.0f * bounds.size[2] / (float)length);
                     water.transform.position = new Vector3(x + 0.5f, y + 0.1f, z + 0.5f);
                     ObjectData waterData = new ObjectData("Water", water.transform.position, water.transform.rotation, water.transform.localScale);
@@ -1120,6 +1133,8 @@ public int GetNumberOfDragons()
                     cube.GetComponent<BoxCollider>().size = new Vector3(1.1f, 20.0f * storey_height, 1.1f);
                     cube.GetComponent<BoxCollider>().isTrigger = true;
                     cube.AddComponent<Water>();
+                    cube.layer = LayerMask.NameToLayer("Walkable");
+                    cube.isStatic = true;
                     ObjectData WaterBoxData = new ObjectData("WaterBox", cube.transform.position, cube.transform.rotation, cube.transform.localScale);
                     objDetails.Add(WaterBoxData);
                     createdGameObjs.Add(cube);
