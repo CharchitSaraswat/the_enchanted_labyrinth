@@ -9,7 +9,7 @@ public class Virus : MonoBehaviour
 {
     private GameObject fps_player_obj;
     private Level level;
-    private float radius_of_search_for_player = 15.0f;
+    private float radius_of_search_for_player = 20.0f;
     private float virus_speed;
     private SwordsmanController littleSoldier;
     private float storey_height;
@@ -25,9 +25,19 @@ public class Virus : MonoBehaviour
 
     private bool isDying = false;
 
+    public GameObject healthBarPrefab; // Assign this in the Inspector
+    private GameObject healthBar;
+    private RectTransform healthBarRect;
+    private Rigidbody rb;
 
 	void Start ()
     {
+        rb = GetComponent<Rigidbody>();
+        if (rb == null)
+        {
+            Debug.LogError("Rigidbody component not found on the virus!");
+        }
+
         GameObject level_obj = GameObject.FindGameObjectWithTag("Level");
         level = level_obj.GetComponent<Level>();
 
@@ -52,6 +62,12 @@ public class Virus : MonoBehaviour
         {
             Debug.LogError("Animator component not found on the virus!");
         }
+
+        if (healthBarPrefab != null)
+        {
+            healthBar = Instantiate(healthBarPrefab, transform.position + new Vector3(0, 2, 0), Quaternion.identity, transform);
+            healthBarRect = healthBar.GetComponentInChildren<RectTransform>();
+        }
     }
 
     public void UpdatePlayerReference(GameObject newPlayerObj)
@@ -65,11 +81,29 @@ public class Virus : MonoBehaviour
         Destroy(gameObject);
     }
 
-    void Update()
+    private void MoveTowardsPlayer(Vector3 moveDir)
+    {
+        Vector3 nextPos = rb.position + moveDir * virus_speed * Time.deltaTime;
+        nextPos.y = Mathf.Min(nextPos.y, maxHeight);
+        rb.MovePosition(nextPos);
+    }
+
+    private void RotateTowardsPlayer(Quaternion targetRotation)
+    {
+        Quaternion newRotation = Quaternion.Slerp(rb.rotation, targetRotation, virus_speed * Time.deltaTime);
+        rb.MoveRotation(newRotation);
+    }
+
+    void FixedUpdate()
     {
         if (littleSoldier.player_health < 0.001f || level.player_entered_house || fps_player_obj == null)
             return;
         // Debug.Log("Virus health: " + virus_health);
+        if (healthBarRect != null)
+        {
+            healthBarRect.localScale = new Vector3(virus_health / 100.0f, 1, 1);
+        }
+
         if (virus_health < 0.001f && !isDying)
         {
             isDying = true;
@@ -106,21 +140,36 @@ public class Virus : MonoBehaviour
 
                 // Rotate towards the player
                 Quaternion targetRotation = Quaternion.LookRotation(moveDir);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, virus_speed * Time.deltaTime);
 
-                // Check if the NPC is facing the player before moving
-                if (Quaternion.Angle(transform.rotation, targetRotation) < 1.0f)
-                {   animator.SetBool("isFlyingForward", true);
-                    Vector3 nextPos = transform.position + moveDir * virus_speed * Time.deltaTime;
-                    nextPos.y = Mathf.Min(nextPos.y, maxHeight);
+                // TestCode comment in if does not work
+                // transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, virus_speed * Time.deltaTime);
 
-                    // Apply the new position
-                    transform.position = nextPos;
+                // // Check if the NPC is facing the player before moving
+                // if (Quaternion.Angle(transform.rotation, targetRotation) < 1.0f)
+                // {   animator.SetBool("isFlyingForward", true);
+                //     Vector3 nextPos = transform.position + moveDir * virus_speed * Time.deltaTime;
+                //     nextPos.y = Mathf.Min(nextPos.y, maxHeight);
+
+                //     // Apply the new position
+                //     transform.position = nextPos;
+                // }
+                // else
+                // {
+                //     // NPC is not yet facing the player, stop the fly forward animation
+                //     animator.SetBool("isFlyingForward", false);
+                // }
+
+                float angleToPlayer = Quaternion.Angle(rb.rotation, targetRotation);
+
+                if (angleToPlayer < 1.0f)
+                {
+                    animator.SetBool("isFlyingForward", true);
+                    MoveTowardsPlayer(moveDir);
                 }
                 else
                 {
-                    // NPC is not yet facing the player, stop the fly forward animation
                     animator.SetBool("isFlyingForward", false);
+                    RotateTowardsPlayer(targetRotation);
                 }
             }
             else

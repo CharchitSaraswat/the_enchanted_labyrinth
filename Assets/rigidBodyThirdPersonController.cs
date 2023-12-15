@@ -6,8 +6,8 @@ public class SwordsmanController : MonoBehaviour
     private Animator animator;
 
     private CharacterController character_controller;
-    public float walkSpeed = 5.0f;
-    public float runSpeed = 10.0f;
+    public float walkSpeed = 3.0f;
+    public float runSpeed = 5.0f;
 
     float gravity = -9.81f;
     private Vector3 movement_direction;
@@ -28,11 +28,9 @@ public class SwordsmanController : MonoBehaviour
     public float player_health = 100.0f;
 
     RaycastHit hit;
-    public float attack_radius = 100.0f;
 
     private Virus og_dragon;
     private float maxHeight;
-
     private GameObject level_obj;
 
     private float healthDeductionInterval = 0.25f;
@@ -49,35 +47,6 @@ public class SwordsmanController : MonoBehaviour
         character_controller = GetComponent<CharacterController>();
         movement_direction = new Vector3(0.0f, 0.0f, 0.0f);
     }
-
-    // private void PerformAttack()
-    // {
-    //     RaycastHit hit;
-    //     maxHeight = level.virusMaxHeight;
-
-    //     //Print Transform to forward to console
-    //     Vector3 direction = new Vector3(transform.forward.x, transform.forward.y + maxHeight, transform.forward.z).normalized;
-    //     Debug.Log("Direction: " + direction);
-
-    //     Debug.DrawRay(transform.position, direction * attack_radius, Color.red, 1.0f);
-    //     // Shoot a raycast forward
-    //     if (Physics.Raycast(transform.position, transform.forward, out hit, attack_radius))
-    //     {
-    //         Debug.Log("Hit name: " + hit.collider.name);
-    //         Debug.Log("Hit tag: " + hit.collider.tag);
-    //         // Check if the ray hits an object tagged as "Dragon"
-    //         if (hit.collider.name == "COVID")
-    //         {
-    //             // Perform attack - reduce health of the dragon
-    //             Virus dragon = hit.collider.GetComponent<Virus>();
-    //             // Debug.Log("Dragon health: " + dragon.virus_health);
-    //             if (dragon != null)
-    //             {
-    //                 dragon.virus_health -= 5.0f; // Replace with your method to reduce the dragon's health
-    //             }
-    //         }
-    //     }
-    // }
 
     private void PerformAttack()
     {
@@ -151,13 +120,13 @@ public class SwordsmanController : MonoBehaviour
                 movement_direction = transform.TransformDirection(Vector3.forward);
                 character_controller.Move(moveVector);
             }
-            else if (Input.GetKey(KeyCode.DownArrow) && Input.GetKey(KeyCode.LeftShift)) {
-                velocity = Mathf.Lerp(velocity, runSpeed / 2.0f, Time.deltaTime);
-                animator.SetBool("isWalking", false);
-                animator.SetBool("isRunning", true);
-                movement_direction = transform.TransformDirection(Vector3.back);
-                character_controller.Move(moveVector);
-            }
+            // else if (Input.GetKey(KeyCode.DownArrow) && Input.GetKey(KeyCode.LeftShift)) {
+            //     velocity = Mathf.Lerp(velocity, runSpeed / 2.0f, Time.deltaTime);
+            //     animator.SetBool("isWalking", false);
+            //     animator.SetBool("isRunning", true);
+            //     movement_direction = transform.TransformDirection(Vector3.back);
+            //     character_controller.Move(moveVector);
+            // }
             else if (Input.GetKey(KeyCode.UpArrow)){
                 velocity = Mathf.Lerp(velocity, walkSpeed / 2.0f, Time.deltaTime);
                 animator.SetBool("isWalking", true);

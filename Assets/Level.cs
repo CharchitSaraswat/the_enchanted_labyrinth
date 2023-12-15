@@ -40,7 +40,7 @@ public class Level : MonoBehaviour
     public int width = 16;   // size of level (default 16 x 16 blocks)
     public int length = 16;
     public float storey_height = 2.5f;   // height of walls
-    public float virus_speed = 3.0f;     // virus velocity
+    public float virus_speed = 20.0f;     // virus velocity
     public GameObject fps_prefab;        // these should be set to prefabs as provided in the starter scene
     public GameObject virus_prefab;
     public GameObject water_prefab;
@@ -1040,7 +1040,6 @@ public int GetNumberOfDragons()
                     cube.name = "WALL";
                     cube.transform.localScale = new Vector3(bounds.size[0] / (float)width, storey_height, bounds.size[2] / (float)length);
                     cube.transform.position = new Vector3(x + 0.5f, y + storey_height / 2.0f, z + 0.5f);
-                    // cube.GetComponent<Renderer>().material.color = Color.red;
                     Material grassMaterial = Resources.Load<Material>("Stylize_Grass_diffuse");
                     cube.GetComponent<Renderer>().material = grassMaterial;
                     createdGameObjs.Add(cube);
@@ -1053,7 +1052,7 @@ public int GetNumberOfDragons()
                     virus.name = "COVID";
                     virus.transform.position = new Vector3(x + 0.5f, y + Random.Range(1.0f, storey_height / 2.0f), z + 0.5f);
 
-                    virus.AddComponent<Virus>();
+                    // virus.AddComponent<Virus>();
                     Virus virusScript = virus.GetComponent<Virus>();
                     virusScript.maxHeight = storey_height / 4.0f;
                     virusMaxHeight = storey_height / 4.0f;
