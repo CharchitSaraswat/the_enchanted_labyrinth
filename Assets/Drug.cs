@@ -43,9 +43,12 @@ public class Drug : MonoBehaviour
                     swordsmanController.player_health = 100.0f;
                 }
             }
+            level.CollectGem();
             Debug.Log("Drug collided with " + collision.gameObject.name);
             level.drug_landed_on_player_recently = true;
             Destroy(gameObject);
         }
     }
+
+ 
 }
