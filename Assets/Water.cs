@@ -35,7 +35,6 @@ public class Water : MonoBehaviour
                 }
             }
             level.player_is_on_water = true;
-            level.player_health -= Random.Range(0.05f, 0.2f);
         }
     }
 

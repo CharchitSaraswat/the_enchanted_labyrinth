@@ -102,6 +102,7 @@ public class SwordsmanController : MonoBehaviour
         {
             isDying = true;
             animator.SetTrigger("dead");
+            level.player_dead = true;
             return;
         }
         if (!isDying)

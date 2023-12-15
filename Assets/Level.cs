@@ -68,7 +68,7 @@ public class Level : MonoBehaviour
 
     // fields/variables accessible from other scripts
     internal GameObject fps_player_obj;   // instance of FPS template
-    internal float player_health = 1.0f;  // player health in range [0.0, 1.0]
+    public bool player_dead = false;  // player health in range [0.0, 1.0]
     internal int num_virus_hit_concurrently = 0;            // how many viruses hit the player before washing them off
     internal bool virus_landed_on_player_recently = false;  // has virus hit the player? if yes, a timer of 5sec starts before infection
     internal float timestamp_virus_landed = float.MaxValue; // timestamp to check how many sec passed since the virus landed on player
@@ -97,6 +97,8 @@ public class Level : MonoBehaviour
 
     public Canvas successCanvas;
     public Canvas failureCanvas;
+
+    public Canvas startAgainCanvas;
 
     public Text gemsCollectedTillNow; // Assign this in the inspector
     public Text  dragonsDefeatedTillNow; // Assign this in the inspector
@@ -237,6 +239,7 @@ private void GenerateAndDisplayEquation()
         successCanvas.enabled = false;
         failureCanvas.enabled = false;
         parent_canvas.enabled = false;
+        startAgainCanvas.enabled = false;
         // solve_canvas.enabled = false;
         main_canvas.enabled = false;
         description_canvas.enabled = true;
@@ -280,7 +283,7 @@ public int GetNumberOfDragons()
         drug_landed_on_player_recently = false;
         player_is_on_water = false;
         player_entered_house = false;
-        player_health = 1.0f;
+        player_dead = false;
 
         foreach (GameObject obj in createdGameObjs)
             if (obj != null){
@@ -366,7 +369,7 @@ public int GetNumberOfDragons()
         objDetails.Clear();
         function_calls = 0;
         num_viruses = 0;
-        player_health = 1.0f;
+        player_dead = false;
         num_virus_hit_concurrently = 0;
         source = gameObject.GetComponent<AudioSource>();
         virus_sound = Resources.Load<AudioClip>("VirusSound");
@@ -1323,10 +1326,11 @@ public int GetNumberOfDragons()
     }
     void Update()
     {
-        if (player_health < 0.001f) // the player dies here
+        if (player_dead) // the player dies here
         {
             PlaySoundWithLimit(player_health_gone_sound, 1.5f);
             text_box.GetComponent<Text>().text = "";
+            startAgainCanvas.enabled = true;
 
             if (fps_player_obj != null)
             {
@@ -1420,13 +1424,13 @@ public int GetNumberOfDragons()
         if (drug_landed_on_player_recently)
         {
             PlaySoundWithLimit(drug_sound, 1.5f);
-            if (player_health < 0.999f || virus_landed_on_player_recently)
-                text_box.GetComponent<Text>().text = "Phew! The new gem worked wonders!";
-            else
-                text_box.GetComponent<Text>().text = "";
+            // if (player_health < 0.999f || virus_landed_on_player_recently)
+            //     text_box.GetComponent<Text>().text = "Phew! The new gem worked wonders!";
+            // else
+            //     text_box.GetComponent<Text>().text = "";
             timestamp_last_msg = Time.time;
-            player_health += Random.Range(0.25f, 0.75f);
-            player_health = Mathf.Min(player_health, 1.0f);
+            // player_health += Random.Range(0.25f, 0.75f);
+            // player_health = Mathf.Min(player_health, 1.0f);
             drug_landed_on_player_recently = false;
             timestamp_virus_landed = float.MaxValue;
             virus_landed_on_player_recently = false;
