@@ -168,15 +168,15 @@ private void UpdateDragonUI() {
 }
 public void DisplayEndGameSuccessResults()
 {
-    gemsCollectedSuccessText.text = $"Gems Collected: {numberOfGemsCollected}"; // Assuming `numberOfGems` is the variable tracking collected gems
-    dragonsDefeatedSuccessText.text = $"Dragons Defeated: { numberOfDragonsDefeated}"; // Using the variable from previous step
+    gemsCollectedSuccessText.text = $"x {numberOfGemsCollected}"; // Assuming `numberOfGems` is the variable tracking collected gems
+    dragonsDefeatedSuccessText.text = $"x { numberOfDragonsDefeated}"; // Using the variable from previous step
    // successCanvas.enabled = true; // Activate the canvas
 }
 
 public void DisplayEndGameFailureResults()
 {
-    gemsCollectedFailureText.text = $"Gems Collected: {numberOfGemsCollected}"; // Assuming `numberOfGems` is the variable tracking collected gems
-    dragonsDefeatedFailureText.text = $"Dragons Defeated: { numberOfDragonsDefeated}"; // Using the variable from previous step
+    gemsCollectedFailureText.text = $"x {numberOfGemsCollected}"; // Assuming `numberOfGems` is the variable tracking collected gems
+    dragonsDefeatedFailureText.text = $"x { numberOfDragonsDefeated}"; // Using the variable from previous step
    // successCanvas.enabled = true; // Activate the canvas
 }
 
@@ -192,10 +192,10 @@ private void GenerateAndDisplayEquation()
     number_of_gems = Random.Range(min, numberOfGems+1); //change
     coefficient_of_dragons = Random.Range(min, max + 1);
     number_of_dragons = Random.Range(min, numberOfDragons); //change
-     Debug.Log("coefficient_of_gems " + coefficient_of_gems);
-    Debug.Log("x " + number_of_gems );
-    Debug.Log("coefficient_of_dragons" + coefficient_of_dragons);
-    Debug.Log("y " + number_of_dragons);
+    // Debug.Log("coefficient_of_gems " + coefficient_of_gems);
+    // Debug.Log("x " + number_of_gems );
+    // Debug.Log("coefficient_of_dragons" + coefficient_of_dragons);
+    // Debug.Log("y " + number_of_dragons);
     // Debug.Log("Number of Gems: " + numberOfGems);
     // Debug.Log("Number of Dragons: " + numberOfDragons);
 
@@ -441,8 +441,8 @@ public int GetNumberOfDragons()
         GenerateAndDisplayEquation();
         numberOfGems = GetNumberOfGems();
         numberOfDragons = GetNumberOfDragons();
-        Debug.Log("Number of Gems after initialize " + numberOfGems);
-        Debug.Log("Number of Dragons after initialize " + numberOfDragons);
+        // Debug.Log("Number of Gems after initialize " + numberOfGems);
+        // Debug.Log("Number of Dragons after initialize " + numberOfDragons);
         }
     }
 
@@ -1326,7 +1326,7 @@ public int GetNumberOfDragons()
         if (player_health < 0.001f) // the player dies here
         {
             PlaySoundWithLimit(player_health_gone_sound, 1.5f);
-            text_box.GetComponent<Text>().text = "Failed!";
+            text_box.GetComponent<Text>().text = "";
 
             if (fps_player_obj != null)
             {
@@ -1356,9 +1356,9 @@ public int GetNumberOfDragons()
             PlaySoundWithLimit(house_reached_sound, 1.5f);
             
             if (virus_landed_on_player_recently)
-                text_box.GetComponent<Text>().text = "Washed it off at home! Success!!!";
+                text_box.GetComponent<Text>().text = "";  //Washed it off at home! Success!!!
             else{
-                text_box.GetComponent<Text>().text = "Success!!!";
+                text_box.GetComponent<Text>().text = ""; //Success!!!
             }
             if (fps_player_obj != null){
                 Camera playerCam = fps_player_obj.GetComponentInChildren<Camera>();
@@ -1386,7 +1386,7 @@ public int GetNumberOfDragons()
 
         if (Time.time - timestamp_last_msg > 7.0f) // renew the msg by restating the initial goal
         {
-            text_box.GetComponent<Text>().text = "Find your home!";            
+            text_box.GetComponent<Text>().text = "Crack the code to find your home!";            
         }
 
         // virus hits the players (boolean variable is manipulated by Virus.cs)
@@ -1421,9 +1421,9 @@ public int GetNumberOfDragons()
         {
             PlaySoundWithLimit(drug_sound, 1.5f);
             if (player_health < 0.999f || virus_landed_on_player_recently)
-                text_box.GetComponent<Text>().text = "Phew! New drug helped!";
+                text_box.GetComponent<Text>().text = "Phew! The new gem worked wonders!";
             else
-                text_box.GetComponent<Text>().text = "No drug was needed!";
+                text_box.GetComponent<Text>().text = "";
             timestamp_last_msg = Time.time;
             player_health += Random.Range(0.25f, 0.75f);
             player_health = Mathf.Min(player_health, 1.0f);
