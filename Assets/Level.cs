@@ -85,7 +85,7 @@ public int numberOfGemsCollected = 0;
 
     public Canvas play_again_canvas;
     public Canvas try_again_canvas;
-    public Canvas solve_canvas;
+    // public Canvas solve_canvas;
     public Canvas successCanvas;
     public Canvas failureCanvas;
     public Canvas main_canvas;
@@ -130,24 +130,30 @@ public void DefeatDragon() {
     //dragonsDefeatedTillNow.text = $"Dragons Defeated: {numberOfDragonsDefeated}"; // Using the variable from previous step
     UpdateDragonUI();
 }
+
+// TODO
 private void UpdateGemUI() {
-    gemsCollectedTillNow.text = $"Gems Collected: {numberOfGemsCollected}";
+    gemsCollectedTillNow.text = $"x {numberOfGemsCollected}";
 }
 
 private void UpdateDragonUI() {
-     dragonsDefeatedTillNow.text = $"Dragons Defeated: {numberOfDragonsDefeated}";
+     dragonsDefeatedTillNow.text = $"x {numberOfDragonsDefeated}";
 }
+
+// TODO
 public void DisplayEndGameSuccessResults()
 {
-    gemsCollectedSuccessText.text = $"Gems Collected: {numberOfGemsCollected}"; // Assuming `numberOfGems` is the variable tracking collected gems
-    dragonsDefeatedSuccessText.text = $"Dragons Defeated: { numberOfDragonsDefeated}"; // Using the variable from previous step
+    gemsCollectedSuccessText.text = $"x {numberOfGemsCollected}"; // Assuming `numberOfGems` is the variable tracking collected gems
+    dragonsDefeatedSuccessText.text = $"x { numberOfDragonsDefeated}"; // Using the variable from previous step
    // successCanvas.enabled = true; // Activate the canvas
 }
 
+
+// TODO
 public void DisplayEndGameFailureResults()
 {
-    gemsCollectedFailureText.text = $"Gems Collected: {numberOfGemsCollected}"; // Assuming `numberOfGems` is the variable tracking collected gems
-    dragonsDefeatedFailureText.text = $"Dragons Defeated: { numberOfDragonsDefeated}"; // Using the variable from previous step
+    gemsCollectedFailureText.text = $"x {numberOfGemsCollected}"; // Assuming `numberOfGems` is the variable tracking collected gems
+    dragonsDefeatedFailureText.text = $"x { numberOfDragonsDefeated}"; // Using the variable from previous step
    // successCanvas.enabled = true; // Activate the canvas
 }
 private void GenerateAndDisplayEquation()
@@ -204,7 +210,7 @@ private void GenerateAndDisplayEquation()
     {
         play_again_canvas.enabled = false;
         try_again_canvas.enabled = false;
-        solve_canvas.enabled = false;
+        // solve_canvas.enabled = false;
         main_canvas.enabled = true;
         successCanvas.enabled = false;
         failureCanvas.enabled = false;
@@ -1360,7 +1366,7 @@ for (int i = 0; i < additionalGems; i++)
 
         if (Time.time - timestamp_last_msg > 7.0f) // renew the msg by restating the initial goal
         {
-            text_box.GetComponent<Text>().text = "Find your home!";            
+            text_box.GetComponent<Text>().text = "Crack the code to find your home!";            
         }
 
         // virus hits the players (boolean variable is manipulated by Virus.cs)
