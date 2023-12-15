@@ -109,13 +109,24 @@ public class Level : MonoBehaviour
     public List<ObjectData> objDetails = new List<ObjectData>();
 
     private AudioSource source;
-    public AudioClip virus_sound;
-    public AudioClip player_health_gone_sound;
-    public AudioClip water_sound;
+    // public AudioClip virus_sound;
+    // public AudioClip player_health_gone_sound;
+    // public AudioClip water_sound;
 
-    public AudioClip drug_sound;
+    // public AudioClip drug_sound;
 
-    public AudioClip house_reached_sound;
+    // public AudioClip house_reached_sound;
+
+    //NEW
+    public AudioClip fire_sound;
+    public AudioClip dino_attack;
+    public AudioClip got_gem;
+
+    public AudioClip lose_game;
+
+    public AudioClip win_game;
+    public AudioClip health_decrease;
+
 
     public int ExitSoundPlayed = 0;
 
@@ -372,11 +383,18 @@ public int GetNumberOfDragons()
         player_dead = false;
         num_virus_hit_concurrently = 0;
         source = gameObject.GetComponent<AudioSource>();
-        virus_sound = Resources.Load<AudioClip>("VirusSound");
-        player_health_gone_sound = Resources.Load<AudioClip>("HealthSound");
-        water_sound = Resources.Load<AudioClip>("WaterSound");
-        drug_sound = Resources.Load<AudioClip>("DrugSound");
-        house_reached_sound = Resources.Load<AudioClip>("EndSound");
+    
+        fire_sound = Resources.Load<AudioClip>("FireEnter");
+        dino_attack = Resources.Load<AudioClip>("DinoAttack");
+        got_gem = Resources.Load<AudioClip>("GotGem");
+        lose_game = Resources.Load<AudioClip>("LosingSound");
+        win_game = Resources.Load<AudioClip>("Winning");
+        health_decrease = Resources.Load<AudioClip>("DecreaseHealth");
+        // virus_sound = Resources.Load<AudioClip>("VirusSound");
+        // player_health_gone_sound = Resources.Load<AudioClip>("HealthSound");
+        // water_sound = Resources.Load<AudioClip>("WaterSound");
+        // drug_sound = Resources.Load<AudioClip>("DrugSound");
+        // house_reached_sound = Resources.Load<AudioClip>("EndSound");
         if (source == null)
         {
             source = gameObject.AddComponent<AudioSource>();
@@ -1328,7 +1346,7 @@ public int GetNumberOfDragons()
     {
         if (player_dead) // the player dies here
         {
-            PlaySoundWithLimit(player_health_gone_sound, 1.5f);
+            PlaySoundWithLimit(lose_game, 1.5f);
             text_box.GetComponent<Text>().text = "";
             startAgainCanvas.enabled = true;
 
@@ -1357,7 +1375,7 @@ public int GetNumberOfDragons()
         }
         if (player_entered_house) // the player suceeds here, variable manipulated by House.cs
         {
-            PlaySoundWithLimit(house_reached_sound, 1.5f);
+            PlaySoundWithLimit(win_game, 1.5f);
             
             if (virus_landed_on_player_recently)
                 text_box.GetComponent<Text>().text = "";  //Washed it off at home! Success!!!
@@ -1423,7 +1441,7 @@ public int GetNumberOfDragons()
         // drug picked by the player  (boolean variable is manipulated by Drug.cs)
         if (drug_landed_on_player_recently)
         {
-            PlaySoundWithLimit(drug_sound, 1.5f);
+            PlaySoundWithLimit(got_gem, 1.5f);
             // if (player_health < 0.999f || virus_landed_on_player_recently)
             //     text_box.GetComponent<Text>().text = "Phew! The new gem worked wonders!";
             // else
