@@ -99,6 +99,7 @@ public class Virus : MonoBehaviour
         if (littleSoldier.player_health < 0.001f || level.player_entered_house || fps_player_obj == null)
             return;
         // Debug.Log("Virus health: " + virus_health);
+
         if (healthBarRect != null)
         {
             healthBarRect.localScale = new Vector3(virus_health / 100.0f, 1, 1);
@@ -108,6 +109,7 @@ public class Virus : MonoBehaviour
         {
             isDying = true;
             animator.SetTrigger("dead");
+            level.DefeatDragon();
             StartCoroutine(DestroyAfterDelay(2.0f)); // 1 second delay
             return;
         }
