@@ -49,7 +49,10 @@ public class Level : MonoBehaviour
     public Text displayEquation;
     public GameObject text_box;
     // public GameObject scroll_bar;
-
+    public Text gemsCollectedSuccessText; // Assign this in the inspector
+    public Text dragonsDefeatedSuccessText; // Assign this in the inspector
+     public Text gemsCollectedFailureText; // Assign this in the inspector
+    public Text dragonsDefeatedFailureText; // Assign this in the inspector
     private int coefficient_of_gems; //a
 private int number_of_gems; //x
 private int coefficient_of_dragons; //b
@@ -57,6 +60,8 @@ private int number_of_dragons; //y
 private int result;
 private int numberOfGems;
 private    int numberOfDragons;
+public int numberOfGemsCollected = 0;
+    public int numberOfDragonsDefeated = 0;
     
 
     // fields/variables accessible from other scripts
@@ -78,9 +83,15 @@ private    int numberOfDragons;
 
     // private HashSet<string> memoizationCache = new HashSet<string>();
 
+
+    public Canvas play_again_canvas;
+    public Canvas try_again_canvas;
+    // public Canvas solve_canvas;
+    public Canvas successCanvas;
+    public Canvas failureCanvas;
+
     // public Canvas play_again_canvas;
     // public Canvas try_again_canvas;
-    public Canvas solve_canvas;
 
     public Canvas main_canvas;
 
@@ -113,27 +124,50 @@ private    int numberOfDragons;
 
 
     private int correctAnswer = 4;
+     public Text gemsCollectedTillNow; // Assign this in the inspector
+    public Text  dragonsDefeatedTillNow; // Assign this in the inspector
+
+    
+
+public void CollectGem() {
+    numberOfGemsCollected++;
+    // Update UI or game state here
+    //gemsCollectedTillNow.text = $"Gems Collected: {numberOfGemsCollected}"; // Assuming `numberOfGems` is the variable tracking collected gems
+    UpdateGemUI();
+}
+
+public void DefeatDragon() {
+    numberOfDragonsDefeated++;
+    // Update UI or game state here
+    //dragonsDefeatedTillNow.text = $"Dragons Defeated: {numberOfDragonsDefeated}"; // Using the variable from previous step
+    UpdateDragonUI();
+}
+
+// TODO
+private void UpdateGemUI() {
+    gemsCollectedTillNow.text = $"x {numberOfGemsCollected}";
+}
+
+private void UpdateDragonUI() {
+     dragonsDefeatedTillNow.text = $"x {numberOfDragonsDefeated}";
+}
+
+// TODO
+public void DisplayEndGameSuccessResults()
+{
+    gemsCollectedSuccessText.text = $"x {numberOfGemsCollected}"; // Assuming `numberOfGems` is the variable tracking collected gems
+    dragonsDefeatedSuccessText.text = $"x { numberOfDragonsDefeated}"; // Using the variable from previous step
+   // successCanvas.enabled = true; // Activate the canvas
+}
 
 
-    // feel free to put more fields here, if you need them e.g, add AudioClips that you can also reference them from other scripts
-    // for sound, make also sure that you have ONE audio listener active (either the listener in the FPS or the main camera, switch accordingly)
-
-    // a helper function that randomly shuffles the elements of a list (useful to randomize the solution to the CSP)
-
-// private string LoadTextFromFile(string filePath)
-// {
-//     if (File.Exists(filePath))
-//     {
-//         return File.ReadAllText(filePath);
-//     }
-//     else
-//     {
-//         Debug.LogError("Cannot find file at " + filePath);
-//         return "";
-//     }
-// }
-
-
+// TODO
+public void DisplayEndGameFailureResults()
+{
+    gemsCollectedFailureText.text = $"x {numberOfGemsCollected}"; // Assuming `numberOfGems` is the variable tracking collected gems
+    dragonsDefeatedFailureText.text = $"x { numberOfDragonsDefeated}"; // Using the variable from previous step
+   // successCanvas.enabled = true; // Activate the canvas
+}
 private void GenerateAndDisplayEquation()
 {
     // Set the range for the random numbers
@@ -186,13 +220,23 @@ private void GenerateAndDisplayEquation()
     // Use this for initialization
     void Start()
     {
+
+        play_again_canvas.enabled = false;
+        try_again_canvas.enabled = false;
+        // solve_canvas.enabled = false;
+        successCanvas.enabled = false;
+        failureCanvas.enabled = false;
+
         // play_again_canvas.enabled = false;
         // try_again_canvas.enabled = false;
         parent_canvas.enabled = false;
         solve_canvas.enabled = false;
         main_canvas.enabled = false;
         description_canvas.enabled = true;
+
         // InitializeLevel("start");
+        UpdateGemUI();
+    UpdateDragonUI();
     }
 
     public void DescriptionCanvas(){
@@ -223,7 +267,7 @@ public int GetNumberOfDragons()
         //  scoresFilePath = Path.Combine("/Users/somyaaaggarwal/Documents/Scores", scoresFileName);
     //     string textToShow = LoadTextFromFile("/Users/somyaaaggarwal/Downloads/Equations.txt");
     // displayEquation.text = textToShow;
-
+       // List<TileType>[,] grid_ = new List<TileType>[width, length];
      
         virus_landed_on_player_recently = false;
         timestamp_virus_landed = float.MaxValue;
@@ -231,7 +275,7 @@ public int GetNumberOfDragons()
         player_is_on_water = false;
         player_entered_house = false;
         player_health = 1.0f;
-
+       // List<TileType>[,] grid = new List<TileType>[width, length];
         foreach (GameObject obj in createdGameObjs)
             if (obj != null){
                 Destroy(obj.gameObject);
@@ -311,6 +355,10 @@ public int GetNumberOfDragons()
             }
             UpdateVirusReferencesToPlayer();
         } else {
+       
+
+
+        //
         bounds = GetComponent<Collider>().bounds; 
         timestamp_last_msg = 0.0f;
         objDetails.Clear();
@@ -1142,6 +1190,44 @@ public int GetNumberOfDragons()
                 }
             }
         }
+
+
+        //testt
+        int additionalGems = 10; // Number of extra gems to add
+
+for (int i = 0; i < additionalGems; i++)
+{
+    int randomW, randomL;
+    do
+    {
+        randomW = Random.Range(1, width - 1);
+        randomL = Random.Range(1, length - 1);
+    } 
+    while (solution[randomW, randomL][0] != TileType.FLOOR); // Ensure the spot is a floor tile
+
+    GameObject capsule = Instantiate(gem_prefab, new Vector3(0, 0, 0), Quaternion.identity);
+    capsule.name = "DRUG";
+    float x = bounds.min[0] + (float)randomW * (bounds.size[0] / (float)width);
+    float z = bounds.min[2] + (float)randomL * (bounds.size[2] / (float)length);
+    capsule.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+    capsule.transform.position = new Vector3(x, bounds.min[1] + 1.0f, z);
+    capsule.transform.rotation = Quaternion.Euler(-90f, 45f, 0f);
+    //capsule.transform.position = new Vector3(x, bounds.min[1] + 1.0f, z); // Adjust the Y coordinate as needed
+    //capsule.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f); // Adjust the scale as needed
+    Rigidbody rb = capsule.AddComponent<Rigidbody>();
+    rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
+    rb.useGravity = false;
+    capsule.GetComponent<Renderer>().material.color = Color.green;
+    capsule.AddComponent<Drug>();
+
+    createdGameObjs.Add(capsule);
+    ObjectData capsuleData = new ObjectData("Capsule", capsule.transform.position, capsule.transform.rotation, capsule.transform.localScale);
+    objDetails.Add(capsuleData);
+}
+
+
+
+        //
     }
 
 
@@ -1275,7 +1361,7 @@ public int GetNumberOfDragons()
             if (virus_landed_on_player_recently)
                 text_box.GetComponent<Text>().text = "Washed it off at home! Success!!!";
             else{
-                text_box.GetComponent<Text>().text = "Success!!!";
+                text_box.GetComponent<Text>().text = "";
             }
             if (fps_player_obj != null){
                 Camera playerCam = fps_player_obj.GetComponentInChildren<Camera>();
@@ -1288,13 +1374,25 @@ public int GetNumberOfDragons()
             Object.Destroy(fps_player_obj);
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-            solve_canvas.enabled = true;
+
+
+            Debug.Log("random gems generated"+number_of_gems);
+            Debug.Log("gems collected"+numberOfGemsCollected);
+
+            if(number_of_gems == numberOfGemsCollected)// && numberOfDragonsDefeated ==  number_of_dragons)
+            {
+            DisplayEndGameSuccessResults();
+            successCanvas.enabled = true; } else {
+               DisplayEndGameFailureResults(); 
+               failureCanvas.enabled = true;
+            }
+            //solve_canvas.enabled = true;
             return;
         }
 
         if (Time.time - timestamp_last_msg > 7.0f) // renew the msg by restating the initial goal
         {
-            text_box.GetComponent<Text>().text = "Find your home!";            
+            text_box.GetComponent<Text>().text = "Crack the code to find your home!";            
         }
 
         // virus hits the players (boolean variable is manipulated by Virus.cs)

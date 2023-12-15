@@ -63,7 +63,7 @@ public class Virus : MonoBehaviour
             return;
         // Debug.Log("Virus health: " + virus_health);
         if (virus_health < 0.001f)
-        {
+        {   level.DefeatDragon();
             Destroy(gameObject);
             return;
         }
