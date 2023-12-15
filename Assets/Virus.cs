@@ -9,7 +9,7 @@ public class Virus : MonoBehaviour
 {
     private GameObject fps_player_obj;
     private Level level;
-    private float radius_of_search_for_player = 15.0f;
+    private float radius_of_search_for_player = 20.0f;
     private float virus_speed;
     private SwordsmanController littleSoldier;
     private float storey_height;
@@ -23,9 +23,23 @@ public class Virus : MonoBehaviour
 
     private float timer = 0.0f;
 
+    private bool isDying = false;
+
+    public GameObject healthBarPrefab; // Assign this in the Inspector
+    private GameObject healthBar;
+    private RectTransform healthBarRect;
+
+
+    private Rigidbody rb;
+
 
 	void Start ()
     {
+        rb = GetComponent<Rigidbody>();
+        if (rb == null)
+        {
+            Debug.LogError("Rigidbody component not found on the virus!");
+        }
         GameObject level_obj = GameObject.FindGameObjectWithTag("Level");
         level = level_obj.GetComponent<Level>();
 
@@ -50,6 +64,11 @@ public class Virus : MonoBehaviour
         {
             Debug.LogError("Animator component not found on the virus!");
         }
+        // if (healthBarPrefab != null)
+        // {
+        //     healthBar = Instantiate(healthBarPrefab, transform.position + new Vector3(0, 2, 0), Quaternion.identity, transform);
+        //     healthBarRect = healthBar.GetComponentInChildren<RectTransform>();
+        // }
     }
 
     public void UpdatePlayerReference(GameObject newPlayerObj)
@@ -57,77 +76,107 @@ public class Virus : MonoBehaviour
         fps_player_obj = newPlayerObj;
     }
 
-    void Update()
+    IEnumerator DestroyAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        Destroy(gameObject);
+    }
+
+    private void MoveTowardsPlayer(Vector3 moveDir)
+    {
+        Vector3 nextPos = rb.position + moveDir * virus_speed * Time.deltaTime;
+        nextPos.y = Mathf.Min(nextPos.y, maxHeight);
+        rb.MovePosition(nextPos);
+    }
+
+    private void RotateTowardsPlayer(Quaternion targetRotation)
+    {
+        Quaternion newRotation = Quaternion.Slerp(rb.rotation, targetRotation, virus_speed * Time.deltaTime);
+        rb.MoveRotation(newRotation);
+    }
+
+    void FixedUpdate()
     {
         if (littleSoldier.player_health < 0.001f || level.player_entered_house || fps_player_obj == null)
             return;
         // Debug.Log("Virus health: " + virus_health);
-        if (virus_health < 0.001f)
+        if (virus_health < 0.001f && !isDying)
         {
+            isDying = true;
+            animator.SetTrigger("dead");
             level.DefeatDragon();
-            Destroy(gameObject);
+            StartCoroutine(DestroyAfterDelay(2.0f)); // 1 second delay
             return;
         }
-    
-        timer += Time.deltaTime;
 
-
-    // Existing code for color and scale animations...
-    // Color redness = new Color
-    //     {
-    //         r = Mathf.Max(1.0f, 0.25f + Mathf.Abs(Mathf.Sin(2.0f * Time.time)))
-    //     };
-        
-        transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
-       
-
-        float distanceToPlayer = Vector3.Distance(transform.position, fps_player_obj.transform.position);
-
-        if (distanceToPlayer <= attack_radius ) {
-            animator.SetBool("isFlyingForward", false);
-            animator.SetBool("isFireballShoot", true);
-            if (timer >= healthDeductionInterval)
-            {
-                timer = 0.0f;
-                littleSoldier.player_health -= damagePerAttack;
-            }
-        }
-        else if (radius_of_search_for_player > distanceToPlayer)
+        if(!isDying) 
         {
-            // Calculate direction towards the player
-            Vector3 moveDir = (fps_player_obj.transform.position - transform.position);
-            moveDir.y = 0; // Keeping y-axis fixed to avoid tilting
-            moveDir = moveDir.normalized;
+            timer += Time.deltaTime;
+        
+            transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+        
 
-            // Rotate towards the player
-            Quaternion targetRotation = Quaternion.LookRotation(moveDir);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, virus_speed * Time.deltaTime);
+            float distanceToPlayer = Vector3.Distance(transform.position, fps_player_obj.transform.position);
 
-            // Check if the NPC is facing the player before moving
-            if (Quaternion.Angle(transform.rotation, targetRotation) < 1.0f)
-            {   animator.SetBool("isFlyingForward", true);
-                animator.SetBool("isFireballShoot", true);
-                Vector3 nextPos = transform.position + moveDir * virus_speed * Time.deltaTime;
-                nextPos.y = Mathf.Min(nextPos.y, maxHeight);
+            if (distanceToPlayer <= attack_radius ) {
+                animator.SetBool("isFlyingForward", false);
+                if (timer >= healthDeductionInterval)
+                {
+                    animator.SetTrigger("flyShot");
+                    timer = 0.0f;
+                    littleSoldier.player_health -= damagePerAttack;
+                }
+            }
+            else if (radius_of_search_for_player > distanceToPlayer)
+            {
+                // Calculate direction towards the player
+                Vector3 moveDir = (fps_player_obj.transform.position - transform.position);
+                moveDir.y = 0; // Keeping y-axis fixed to avoid tilting
+                moveDir = moveDir.normalized;
 
-                // Apply the new position
-                transform.position = nextPos;
+                // Rotate towards the player
+                Quaternion targetRotation = Quaternion.LookRotation(moveDir);
+                // transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, virus_speed * Time.deltaTime);
+
+                // // Check if the NPC is facing the player before moving
+                // if (Quaternion.Angle(transform.rotation, targetRotation) < 1.0f)
+                // {   animator.SetBool("isFlyingForward", true);
+                //     animator.SetBool("isFireballShoot", true);
+                //     Vector3 nextPos = transform.position + moveDir * virus_speed * Time.deltaTime;
+                //     nextPos.y = Mathf.Min(nextPos.y, maxHeight);
+
+                //     // Apply the new position
+                //     transform.position = nextPos;
+                // }
+                // else
+                //     {
+                //         // NPC is not yet facing the player, stop the fly forward animation
+                //         animator.SetBool("isFlyingForward", false);
+                //         animator.SetBool("isFireballShoot", false);
+                //     }
+
+                float angleToPlayer = Quaternion.Angle(rb.rotation, targetRotation);
+
+                if (angleToPlayer < 1.0f)
+                {
+                    animator.SetBool("isFlyingForward", true);
+                    MoveTowardsPlayer(moveDir);
+                }
+                else {
+                    animator.SetBool("isFlyingForward", false);
+                    RotateTowardsPlayer(targetRotation);
+                }
             }
             else
                 {
-                    // NPC is not yet facing the player, stop the fly forward animation
+                    // NPC is outside the search radius, stop the fly forward animation
                     animator.SetBool("isFlyingForward", false);
                     animator.SetBool("isFireballShoot", false);
                 }
-        }
-        else
-            {
-                // NPC is outside the search radius, stop the fly forward animation
-                animator.SetBool("isFlyingForward", false);
-                animator.SetBool("isFireballShoot", false);
-            }
 
-        transform.position = new Vector3(transform.position.x, Mathf.Min(transform.position.y, maxHeight), transform.position.z);
+            transform.position = new Vector3(transform.position.x, Mathf.Min(transform.position.y, maxHeight), transform.position.z);
+        }
+    
     }
 
 

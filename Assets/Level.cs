@@ -40,7 +40,7 @@ public class Level : MonoBehaviour
     public int width = 16;   // size of level (default 16 x 16 blocks)
     public int length = 16;
     public float storey_height = 2.5f;   // height of walls
-    public float virus_speed = 3.0f;     // virus velocity
+    public float virus_speed = 20.0f;     // virus velocity
     public GameObject fps_prefab;        // these should be set to prefabs as provided in the starter scene
     public GameObject virus_prefab;
     public GameObject water_prefab;
