@@ -78,11 +78,17 @@ private    int numberOfDragons;
 
     // private HashSet<string> memoizationCache = new HashSet<string>();
 
-    public Canvas play_again_canvas;
-    public Canvas try_again_canvas;
+    // public Canvas play_again_canvas;
+    // public Canvas try_again_canvas;
     public Canvas solve_canvas;
 
     public Canvas main_canvas;
+
+    public Canvas description_canvas;
+
+    public Canvas parent_canvas;
+
+
     public List<GameObject> createdGameObjs = new List<GameObject>();
 
     public List<ObjectData> objDetails = new List<ObjectData>();
@@ -104,6 +110,7 @@ private    int numberOfDragons;
     // public InputField answerInput;
 
     public Text successText;
+
 
     private int correctAnswer = 4;
 
@@ -179,14 +186,22 @@ private void GenerateAndDisplayEquation()
     // Use this for initialization
     void Start()
     {
-        play_again_canvas.enabled = false;
-        try_again_canvas.enabled = false;
+        // play_again_canvas.enabled = false;
+        // try_again_canvas.enabled = false;
+        parent_canvas.enabled = false;
         solve_canvas.enabled = false;
-        main_canvas.enabled = true;
+        main_canvas.enabled = false;
+        description_canvas.enabled = true;
         // InitializeLevel("start");
     }
 
+    public void DescriptionCanvas(){
+        description_canvas.enabled = false;
+        main_canvas.enabled = true;
+        // InitializeLevel("start");
+    }
     public void StartGame(){
+        parent_canvas.enabled = true;
         main_canvas.enabled = false;
         InitializeLevel("start");
     }
@@ -1139,7 +1154,7 @@ public int GetNumberOfDragons()
     public void PlayAgain()
     {
         // Reload the current scene to start over with a new procedural generation
-        play_again_canvas.enabled = false;
+        // play_again_canvas.enabled = false;
         StartCoroutine(PlayAgainCoroutine());
     }
 
@@ -1168,7 +1183,7 @@ public int GetNumberOfDragons()
 
     public void TryLevelAgain()
     {
-        try_again_canvas.enabled = false;
+        // try_again_canvas.enabled = false;
         StartCoroutine(TryAgainCoroutine());
         // recreateSameLevel();
     }
@@ -1248,7 +1263,7 @@ public int GetNumberOfDragons()
                 Object.Destroy(fps_player_obj);
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
-                try_again_canvas.enabled = true;                
+                // try_again_canvas.enabled = true;                
             }
 
             return;
