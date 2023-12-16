@@ -13,3 +13,5 @@ Worked on game UI and description canvas development, main canvas buttons, vario
 
 #### Somyaa Jain:
 Worked on NPC AI development and NPC prefabs. Also worked on fireplace prefab development, PlayAgain feature and creating equations. Worked on Fire.cs, Dragon.cs and parts of Level.cs.
+
+Game code and contribution details can be found here: https://github.com/CharchitSaraswat/the_enchanted_labyrinth/tree/main
