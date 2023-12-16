@@ -4,9 +4,8 @@ using UnityEngine;
 
 // functionality of the house at the exit of the maze
 // it simply has a trigger when player arrived in the house
-public class House : MonoBehaviour
+public class EndZone : MonoBehaviour
 {
-    private GameObject fps_player_obj;
     private Level level;
 
     // Use this for initialization
@@ -19,7 +18,6 @@ public class House : MonoBehaviour
             Debug.LogError("Internal error: could not find the Level object - did you remove its 'Level' tag?");
             return;
         }
-        fps_player_obj = level.fps_player_obj;
     }
 
     private void OnTriggerEnter(Collider other)
