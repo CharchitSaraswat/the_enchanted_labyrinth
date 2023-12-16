@@ -32,9 +32,19 @@ public class Virus : MonoBehaviour
 
     private Rigidbody rb;
 
+    private AudioSource source;
+    public AudioClip dino_attack;
+
 
 	void Start ()
     {
+        source = gameObject.GetComponent<AudioSource>();
+        if (source == null)
+        {
+            source = gameObject.AddComponent<AudioSource>();
+        }
+    
+        dino_attack = Resources.Load<AudioClip>("DinoAttack");
         rb = GetComponent<Rigidbody>();
         if (rb == null)
         {
@@ -95,6 +105,18 @@ public class Virus : MonoBehaviour
         rb.MoveRotation(newRotation);
     }
 
+    public void PlaySoundWithLimit(AudioClip clip, float duration)
+    {
+        source.PlayOneShot(clip);
+        StartCoroutine(StopAudioAfterDuration(duration));
+    }
+
+    private IEnumerator StopAudioAfterDuration(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        source.Stop();
+    }
+
     void FixedUpdate()
     {
         if (littleSoldier.player_health < 0.001f || level.player_entered_house || fps_player_obj == null)
@@ -122,7 +144,9 @@ public class Virus : MonoBehaviour
                 animator.SetBool("isFlyingForward", false);
                 if (timer >= healthDeductionInterval)
                 {
+                    
                     animator.SetTrigger("flyShot");
+                    source.PlayOneShot(dino_attack);
                     timer = 0.0f;
                     littleSoldier.player_health -= damagePerAttack;
                 }

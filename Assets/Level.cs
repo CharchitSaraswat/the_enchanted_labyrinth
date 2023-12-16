@@ -1395,7 +1395,7 @@ public int GetNumberOfDragons()
             Cursor.visible = true;
             // solve_canvas.enabled = true;
 
-            if(number_of_gems == numberOfGemsCollected && numberOfDragonsDefeated ==  number_of_dragons)
+            if(result == (coefficient_of_gems * numberOfGemsCollected + coefficient_of_dragons * numberOfDragonsDefeated))
             {
             DisplayEndGameSuccessResults();
             successCanvas.enabled = true; 

@@ -8,9 +8,18 @@ public class Water : MonoBehaviour
 {
     private GameObject fps_player_obj;
     private Level level;
+    private AudioSource source;
+    public AudioClip fire_sound;
 
     void Start()
     {
+        source = gameObject.GetComponent<AudioSource>();
+        if (source == null)
+        {
+            source = gameObject.AddComponent<AudioSource>();
+        }
+    
+        fire_sound = Resources.Load<AudioClip>("FireEnter");
         GameObject level_obj = GameObject.FindGameObjectWithTag("Level");
         level = level_obj.GetComponent<Level>();
         if (level == null)
@@ -22,12 +31,14 @@ public class Water : MonoBehaviour
     }
 
     private void OnTriggerEnter(Collider other)
-    { Debug.Log("t");
+    {   
+        Debug.Log("t");
         if (other.gameObject.name == "PLAYER")
         {
             SwordsmanController swordsmanController = other.GetComponent<SwordsmanController>();
             if (swordsmanController != null)
             {
+                source.PlayOneShot(fire_sound);
                 swordsmanController.player_health -= Random.Range(5, 20);
                 if (swordsmanController.player_health <= 0)
                 {
