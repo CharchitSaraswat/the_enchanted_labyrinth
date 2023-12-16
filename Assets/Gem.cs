@@ -4,9 +4,9 @@ using UnityEngine;
 
 // functionality of drug
 // animates color, and triggers a variable if the player reaches the drug 
-public class Drug : MonoBehaviour
+public class Gem : MonoBehaviour
 {
-    private GameObject fps_player_obj;
+    private GameObject player_obj;
     private Level level;
 
     void Start()
@@ -18,7 +18,7 @@ public class Drug : MonoBehaviour
             Debug.LogError("Internal error: could not find the Level object - did you remove its 'Level' tag?");
             return;
         }
-        fps_player_obj = level.fps_player_obj;
+        player_obj = level.player_obj;
     }
 
     void Update()
@@ -44,8 +44,8 @@ public class Drug : MonoBehaviour
                 }
             }
             level.CollectGem();
-            Debug.Log("Drug collided with " + collision.gameObject.name);
-            level.drug_landed_on_player_recently = true;
+            Debug.Log("Gem collided with " + collision.gameObject.name);
+            level.gem_landed_on_player_recently = true;
             Destroy(gameObject);
         }
     }

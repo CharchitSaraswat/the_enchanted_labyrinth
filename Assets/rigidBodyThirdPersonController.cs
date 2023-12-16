@@ -29,7 +29,7 @@ public class SwordsmanController : MonoBehaviour
 
     RaycastHit hit;
 
-    private Virus og_dragon;
+    private Dragon og_dragon;
     private float maxHeight;
     private GameObject level_obj;
 
@@ -57,7 +57,7 @@ public class SwordsmanController : MonoBehaviour
         foreach (var hitCollider in hitColliders)
         {
             Debug.Log("Hit name: " + hitCollider.name);
-            if (hitCollider.name == "COVID")
+            if (hitCollider.name == "SOULEATER")
             {
                 // Calculate direction from player to the potential target
                 Vector3 targetDirection = hitCollider.transform.position - transform.position;
@@ -67,13 +67,13 @@ public class SwordsmanController : MonoBehaviour
                 // Check if the target is within the player's field of view
                 if (angle <= attackAngle)
                 {
-                    Virus dragon = hitCollider.GetComponent<Virus>();
+                    Dragon dragon = hitCollider.GetComponent<Dragon>();
                     if (dragon != null)
                     {
                         Debug.Log("Hit dragon");
                         // Perform attack
-                        dragon.virus_health -= 5.0f; // Reduce health
-                        Debug.Log("Hit health: " + dragon.virus_health);
+                        dragon.dragon_health -= 5.0f; // Reduce health
+                        Debug.Log("Hit health: " + dragon.dragon_health);
                     }
                 }
             }

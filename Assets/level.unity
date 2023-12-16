@@ -6196,13 +6196,13 @@ MonoBehaviour:
   width: 16
   length: 16
   storey_height: 6
-  virus_speed: 3
-  fps_prefab: {fileID: 1863613400}
-  virus_prefab: {fileID: 5889267320979916260, guid: 318830e16c9af9a449459f9b35ed0179,
+  dragon_speed: 6
+  player_prefab: {fileID: 1863613400}
+  dragon_prefab: {fileID: 5889267320979916260, guid: 318830e16c9af9a449459f9b35ed0179,
     type: 3}
-  water_prefab: {fileID: 1725317912486240, guid: e55149ba6f4d00741984987e258c3378,
+  fire_prefab: {fileID: 1725317912486240, guid: e55149ba6f4d00741984987e258c3378,
     type: 3}
-  house_prefab: {fileID: 7565473404853061239, guid: 32b6ebd726fab490c9f1d146e173983d,
+  end_zone_prefab: {fileID: 7565473404853061239, guid: 32b6ebd726fab490c9f1d146e173983d,
     type: 3}
   gem_prefab: {fileID: 1000010880751780, guid: c3c0707254334a64ca8198f7486e977d, type: 3}
   displayEquation: {fileID: 749473931}
@@ -6223,15 +6223,12 @@ MonoBehaviour:
   gemsCollectedTillNow: {fileID: 600286020}
   dragonsDefeatedTillNow: {fileID: 1865647332}
   createdGameObjs: []
-  fire_sound: {fileID: 8300000, guid: 96b7309e60b8c4d8fbaf1ee3d34ef5d0, type: 3}
-  dino_attack: {fileID: 8300000, guid: 2369f694e6176442ba9cb86f99c11eda, type: 3}
   got_gem: {fileID: 8300000, guid: 8d4c7a552b509194c8299ce0bdb448d8, type: 3}
   lose_game: {fileID: 8300000, guid: f20f06711bc6a43e8aabc9a7a1db778d, type: 3}
   win_game: {fileID: 8300000, guid: b2ed251f6d1804afa87ee262d0b49628, type: 3}
-  health_decrease: {fileID: 8300000, guid: 64829f8f1085f524e96190b961b0b9e6, type: 3}
   ExitSoundPlayed: 0
   grassMaterial: {fileID: 0}
-  virusMaxHeight: 0
+  dragonMaxHeight: 0
   successText: {fileID: 0}
 --- !u!23 &1919539188
 MeshRenderer:

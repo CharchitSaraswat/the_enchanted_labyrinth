@@ -12,9 +12,9 @@ enum TileType
 {
     WALL = 0,
     FLOOR = 1,
-    WATER = 2,
-    DRUG = 3,
-    VIRUS = 4,
+    FIRE = 2,
+    GEM = 3,
+    DRAGON = 4,
 }
 
 public class ObjectData
@@ -40,11 +40,11 @@ public class Level : MonoBehaviour
     public int width = 16;   // size of level (default 16 x 16 blocks)
     public int length = 16;
     public float storey_height = 2.5f;   // height of walls
-    public float virus_speed = 20.0f;     // virus velocity
-    public GameObject fps_prefab;        // these should be set to prefabs as provided in the starter scene
-    public GameObject virus_prefab;
-    public GameObject water_prefab;
-    public GameObject house_prefab;
+    public float dragon_speed = 6.0f;     // dragon velocity
+    public GameObject player_prefab;        // these should be set to prefabs as provided in the starter scene
+    public GameObject dragon_prefab;
+    public GameObject fire_prefab;
+    public GameObject end_zone_prefab;
     public GameObject gem_prefab;
     public Text displayEquation;
     public GameObject text_box;
@@ -67,27 +67,21 @@ public class Level : MonoBehaviour
     
 
     // fields/variables accessible from other scripts
-    internal GameObject fps_player_obj;   // instance of FPS template
+    internal GameObject player_obj;   // instance of player template
     public bool player_dead = false;  // player health in range [0.0, 1.0]
-    internal int num_virus_hit_concurrently = 0;            // how many viruses hit the player before washing them off
-    internal bool virus_landed_on_player_recently = false;  // has virus hit the player? if yes, a timer of 5sec starts before infection
-    internal float timestamp_virus_landed = float.MaxValue; // timestamp to check how many sec passed since the virus landed on player
-    internal bool drug_landed_on_player_recently = false;   // has drug collided with player?
-    internal bool player_is_on_water = false;               // is player on water block
+    internal int num_dragon_hit_concurrently = 0;            // how many dragons hit the player before washing them off
+    internal bool dragon_landed_on_player_recently = false;  // has dragon hit the player? if yes, a timer of 5sec starts before infection
+    internal float timestamp_dragon_landed = float.MaxValue; // timestamp to check how many sec passed since the dragon landed on player
+    internal bool gem_landed_on_player_recently = false;   // has drug collided with player?
+    internal bool player_is_on_fire = false;               // is player on water block
     internal bool player_entered_house = false;             // has player arrived in house?
 
     // fields/variables needed only from this script
     private Bounds bounds;                   // size of ground plane in world space coordinates 
     private float timestamp_last_msg = 0.0f; // timestamp used to record when last message on GUI happened (after 7 sec, default msg appears)
     private int function_calls = 0;          // number of function calls during backtracking for solving the CSP
-    private int num_viruses = 0;             // number of viruses in the level
-    private List<int[]> pos_viruses;         // stores their location in the grid
-
-    // private HashSet<string> memoizationCache = new HashSet<string>();
-
-    // public Canvas play_again_canvas;
-    // public Canvas try_again_canvas;
-    // public Canvas solve_canvas;
+    private int num_dragons = 0;             // number of dragons in the level
+    private List<int[]> pos_dragons;         // stores their location in the grid
 
     public Canvas main_canvas;
 
@@ -109,67 +103,29 @@ public class Level : MonoBehaviour
     public List<ObjectData> objDetails = new List<ObjectData>();
 
     private AudioSource source;
-    // public AudioClip virus_sound;
-    // public AudioClip player_health_gone_sound;
-    // public AudioClip water_sound;
 
-    // public AudioClip drug_sound;
-
-    // public AudioClip house_reached_sound;
-
-    //NEW
-    public AudioClip fire_sound;
-    public AudioClip dino_attack;
     public AudioClip got_gem;
 
     public AudioClip lose_game;
 
     public AudioClip win_game;
-    public AudioClip health_decrease;
 
 
     public int ExitSoundPlayed = 0;
 
     public Material grassMaterial;
 
-    public float virusMaxHeight = 0.0f;
-    // public InputField answerInput;
+    public float dragonMaxHeight = 0.0f;
 
     public Text successText;
 
-
-    // private int correctAnswer = 4;
-
-
-    // feel free to put more fields here, if you need them e.g, add AudioClips that you can also reference them from other scripts
-    // for sound, make also sure that you have ONE audio listener active (either the listener in the FPS or the main camera, switch accordingly)
-
-    // a helper function that randomly shuffles the elements of a list (useful to randomize the solution to the CSP)
-
-// private string LoadTextFromFile(string filePath)
-// {
-//     if (File.Exists(filePath))
-//     {
-//         return File.ReadAllText(filePath);
-//     }
-//     else
-//     {
-//         Debug.LogError("Cannot find file at " + filePath);
-//         return "";
-//     }
-// }
-
 public void CollectGem() {
     numberOfGemsCollected++;
-    // Update UI or game state here
-    //gemsCollectedTillNow.text = $"Gems Collected: {numberOfGemsCollected}"; // Assuming `numberOfGems` is the variable tracking collected gems
     UpdateGemUI();
 }
 
 public void DefeatDragon() {
     numberOfDragonsDefeated++;
-    // Update UI or game state here
-    //dragonsDefeatedTillNow.text = $"Dragons Defeated: {numberOfDragonsDefeated}"; // Using the variable from previous step
     UpdateDragonUI();
 }
 private void UpdateGemUI() {
@@ -183,14 +139,12 @@ public void DisplayEndGameSuccessResults()
 {
     gemsCollectedSuccessText.text = $"x {numberOfGemsCollected}"; // Assuming `numberOfGems` is the variable tracking collected gems
     dragonsDefeatedSuccessText.text = $"x { numberOfDragonsDefeated}"; // Using the variable from previous step
-   // successCanvas.enabled = true; // Activate the canvas
 }
 
 public void DisplayEndGameFailureResults()
 {
     gemsCollectedFailureText.text = $"x {numberOfGemsCollected}"; // Assuming `numberOfGems` is the variable tracking collected gems
     dragonsDefeatedFailureText.text = $"x { numberOfDragonsDefeated}"; // Using the variable from previous step
-   // successCanvas.enabled = true; // Activate the canvas
 }
 
 private void GenerateAndDisplayEquation()
@@ -205,12 +159,6 @@ private void GenerateAndDisplayEquation()
     number_of_gems = Random.Range(min, numberOfGems+1); //change
     coefficient_of_dragons = Random.Range(min, max + 1);
     number_of_dragons = Random.Range(min, numberOfDragons); //change
-    // Debug.Log("coefficient_of_gems " + coefficient_of_gems);
-    // Debug.Log("x " + number_of_gems );
-    // Debug.Log("coefficient_of_dragons" + coefficient_of_dragons);
-    // Debug.Log("y " + number_of_dragons);
-    // Debug.Log("Number of Gems: " + numberOfGems);
-    // Debug.Log("Number of Dragons: " + numberOfDragons);
 
     // Calculate the result of the equation
     result = coefficient_of_gems * number_of_gems + coefficient_of_dragons * number_of_dragons;
@@ -274,127 +222,34 @@ private void GenerateAndDisplayEquation()
 public int GetNumberOfGems()
 {
     
-    return objDetails.Count(obj => obj.ObjectType == "Capsule");
+    return objDetails.Count(obj => obj.ObjectType == "Gem");
 }
 
 public int GetNumberOfDragons()
 {
-    return objDetails.Count(obj => obj.ObjectType == "Virus"); 
+    return objDetails.Count(obj => obj.ObjectType == "Dragon"); 
 }
 
     public void InitializeLevel(string processType){
-        // initialize internal/private variables
-        //  scoresFilePath = Path.Combine("/Users/somyaaaggarwal/Documents/Scores", scoresFileName);
-    //     string textToShow = LoadTextFromFile("/Users/somyaaaggarwal/Downloads/Equations.txt");
-    // displayEquation.text = textToShow;
-
-     
-        virus_landed_on_player_recently = false;
-        timestamp_virus_landed = float.MaxValue;
-        drug_landed_on_player_recently = false;
-        player_is_on_water = false;
+        dragon_landed_on_player_recently = false;
+        timestamp_dragon_landed = float.MaxValue;
+        gem_landed_on_player_recently = false;
+        player_is_on_fire = false;
         player_entered_house = false;
         player_dead = false;
 
-        foreach (GameObject obj in createdGameObjs)
-            if (obj != null){
-                Destroy(obj.gameObject);
-                Destroy(obj);
-            }
-        if (processType == "tryAgain"){
-            // spawn objs in ObjDetails
-            foreach (ObjectData objData in objDetails)
-            {
-                GameObject obj = null;
-                switch (objData.ObjectType)
-                {
-                    case "Virus":
-                        obj = Instantiate(virus_prefab, objData.Position, objData.Rotation);
-                        obj.name = "COVID";
-                        obj.AddComponent<Virus>();
-                        obj.GetComponent<Rigidbody>().mass = 10000;
-                        createdGameObjs.Add(obj);
-                        break;
-                    case "Water":
-                        obj = Instantiate(water_prefab, objData.Position, objData.Rotation);
-                        obj.name = "WATER";
-                        obj.transform.localScale = objData.Scale;
-                        obj.transform.position = objData.Position;
-                        createdGameObjs.Add(obj);
-                        break;
-                    case "House":
-                        obj = Instantiate(house_prefab, objData.Position, objData.Rotation);
-                        obj.name = "HOUSE";
-
-                        obj.AddComponent<BoxCollider>();
-                        obj.GetComponent<BoxCollider>().isTrigger = true;
-                        obj.GetComponent<BoxCollider>().size = new Vector3(3.0f, 3.0f, 3.0f);
-                        obj.AddComponent<House>();
-                        createdGameObjs.Add(obj);
-                        break;
-                    case "FPSPlayer":
-                        // fps_player_obj = Instantiate(fps_prefab);
-                        fps_player_obj = fps_prefab;
-                        fps_player_obj.name = "PLAYER";
-                        // character is placed above the level so that in the beginning, he appears to fall down onto the maze
-                        fps_player_obj.transform.position = objData.Position;
-                        createdGameObjs.Add(fps_player_obj);
-                        break;
-                    case "Capsule":
-                        obj = Instantiate(gem_prefab, objData.Position, objData.Rotation);
-                        obj.name = "DRUG";
-                        obj.transform.localScale = objData.Scale;
-                        obj.transform.position = objData.Position;
-                        obj.GetComponent<Renderer>().material.color = Color.green;
-                        obj.AddComponent<Drug>();
-                        createdGameObjs.Add(obj);
-                        break;
-                    case "WaterBox":
-                        obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                        obj.name = "WATER_BOX";
-                        obj.transform.localScale = objData.Scale;
-                        obj.transform.position = objData.Position;
-                        obj.GetComponent<Renderer>().material.color = Color.grey;
-                        obj.GetComponent<BoxCollider>().size = new Vector3(1.1f, 20.0f * storey_height, 1.1f);
-                        obj.GetComponent<BoxCollider>().isTrigger = true;
-                        obj.AddComponent<Water>();
-                        createdGameObjs.Add(obj);
-                        break;
-                    case "Wall":
-                        obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                        obj.name = "WALL";
-                        obj.transform.localScale = objData.Scale;
-                        obj.transform.position = objData.Position;
-                        // obj.GetComponent<Renderer>().material.color = Color.red;
-                        obj.GetComponent<Renderer>().material = grassMaterial;
-                        createdGameObjs.Add(obj);
-                        break;
-                    default:
-                        break;
-                }
-            }
-            UpdateVirusReferencesToPlayer();
-        } else {
         bounds = GetComponent<Collider>().bounds; 
         timestamp_last_msg = 0.0f;
         objDetails.Clear();
         function_calls = 0;
-        num_viruses = 0;
+        num_dragons = 0;
         player_dead = false;
-        num_virus_hit_concurrently = 0;
+        num_dragon_hit_concurrently = 0;
         source = gameObject.GetComponent<AudioSource>();
-    
-        fire_sound = Resources.Load<AudioClip>("FireEnter");
-        dino_attack = Resources.Load<AudioClip>("DinoAttack");
+
         got_gem = Resources.Load<AudioClip>("GotGem");
         lose_game = Resources.Load<AudioClip>("LosingSound");
         win_game = Resources.Load<AudioClip>("Winning");
-        health_decrease = Resources.Load<AudioClip>("DecreaseHealth");
-        // virus_sound = Resources.Load<AudioClip>("VirusSound");
-        // player_health_gone_sound = Resources.Load<AudioClip>("HealthSound");
-        // water_sound = Resources.Load<AudioClip>("WaterSound");
-        // drug_sound = Resources.Load<AudioClip>("DrugSound");
-        // house_reached_sound = Resources.Load<AudioClip>("EndSound");
         if (source == null)
         {
             source = gameObject.AddComponent<AudioSource>();
@@ -404,9 +259,9 @@ public int GetNumberOfDragons()
         // useful to keep variables that are unassigned so far
         List<int[]> unassigned = new List<int[]>();
 
-        // will place x viruses in the beginning (at least 1). x depends on the sise of the grid (the bigger, the more viruses)        
-        num_viruses = width * length / 25 + 1; // at least one virus will be added
-        pos_viruses = new List<int[]>();
+        // will place x dragons in the beginning (at least 1). x depends on the sise of the grid (the bigger, the more dragons)        
+        num_dragons = width * length / 25 + 1; // at least one dragon will be added
+        pos_dragons = new List<int[]>();
         // create the wall perimeter of the level, and let the interior as unassigned
         // then try to assign variables to satisfy all constraints
         // *rarely* it might be impossible to satisfy all constraints due to initialization
@@ -414,9 +269,9 @@ public int GetNumberOfDragons()
         bool success = false;
         while (!success) // keep trying until we find a solution
         {
-            for (int v = 0; v < num_viruses; v++)
+            for (int v = 0; v < num_dragons; v++)
             {
-                while (true) // try until virus placement is successful (unlikely that there will no places)
+                while (true) // try until dragon placement is successful (unlikely that there will no places)
                 {
                     // try a random location in the grid
                     int wr = Random.Range(1, width - 1);
@@ -425,8 +280,8 @@ public int GetNumberOfDragons()
                     // if grid location is empty/free, place it there
                     if (grid[wr, lr] == null)
                     {
-                        grid[wr, lr] = new List<TileType> { TileType.VIRUS };
-                        pos_viruses.Add(new int[2] { wr, lr });
+                        grid[wr, lr] = new List<TileType> { TileType.DRAGON };
+                        pos_dragons.Add(new int[2] { wr, lr });
                         break;
                     }
                 }
@@ -438,10 +293,10 @@ public int GetNumberOfDragons()
                         grid[w, l] = new List<TileType> { TileType.WALL };
                     else
                     {
-                        if (grid[w, l] == null) // does not have virus already or some other assignment from previous run
+                        if (grid[w, l] == null) // does not have dragon already or some other assignment from previous run
                         {
-                            // CSP will involve assigning variables to one of the following four values (VIRUS is predefined for some tiles
-                            List<TileType> candidate_assignments = new List<TileType> { TileType.WALL, TileType.FLOOR, TileType.WATER, TileType.DRUG };
+                            // CSP will involve assigning variables to one of the following four values (DRAGON is predefined for some tiles
+                            List<TileType> candidate_assignments = new List<TileType> { TileType.WALL, TileType.FLOOR, TileType.FIRE, TileType.GEM };
                             Shuffle<TileType>(ref candidate_assignments);
                             grid[w, l] = candidate_assignments;
                             unassigned.Add(new int[] { w, l });
@@ -462,9 +317,6 @@ public int GetNumberOfDragons()
         GenerateAndDisplayEquation();
         numberOfGems = GetNumberOfGems();
         numberOfDragons = GetNumberOfDragons();
-        // Debug.Log("Number of Gems after initialize " + numberOfGems);
-        // Debug.Log("Number of Dragons after initialize " + numberOfDragons);
-        }
     }
 
     // one type of constraint already implemented for you
@@ -480,9 +332,9 @@ public int GetNumberOfDragons()
                     number_of_assigned_elements[(int)grid[w, l][0]]++;
             }
 
-        if ((number_of_assigned_elements[(int)TileType.WALL] > num_viruses * 10) ||
-             (number_of_assigned_elements[(int)TileType.WATER] > (width + length) / 4) ||
-             (number_of_assigned_elements[(int)TileType.DRUG] >= num_viruses / 2))
+        if ((number_of_assigned_elements[(int)TileType.WALL] > num_dragons * 10) ||
+             (number_of_assigned_elements[(int)TileType.FIRE] > (width + length) / 4) ||
+             (number_of_assigned_elements[(int)TileType.GEM] >= num_dragons / 2))
             return true;
         else
             return false;
@@ -502,22 +354,12 @@ public int GetNumberOfDragons()
             }
 
         if ((number_of_potential_assignments[(int)TileType.WALL] < (width * length) / 4) ||
-             (number_of_potential_assignments[(int)TileType.WATER] < num_viruses / 4) ||
-             (number_of_potential_assignments[(int)TileType.DRUG] < num_viruses / 4))
+             (number_of_potential_assignments[(int)TileType.FIRE] < num_dragons / 4) ||
+             (number_of_potential_assignments[(int)TileType.GEM] < num_dragons / 4))
             return true;
         else
             return false;
     }
-
-    // *** YOU NEED TO COMPLETE THIS FUNCTION  ***
-    // must return true if there are three (or more) interior consecutive wall blocks either horizontally or vertically
-    // by interior, we mean walls that do not belong to the perimeter of the grid
-    // e.g., a grid configuration: "FLOOR - WALL - WALL - WALL - FLOOR" is not valid
-    // bool TooLongWall(List<TileType>[,] grid)
-    // {
-    //     /*** implement the rest ! */
-    //     return false;
-    // }
 
     bool TooLongWall(List<TileType>[,] grid)
     {
@@ -543,20 +385,10 @@ public int GetNumberOfDragons()
         return false; // No three consecutive walls found
     }
 
-    // *** YOU NEED TO COMPLETE THIS FUNCTION  ***
-    // must return true if there is no WALL adjacent to a virus 
-    // adjacency means left, right, top, bottom, and *diagonal* blocks
-
-    // bool NoWallsCloseToVirus(List<TileType>[,] grid)
-    // {
-    //     /*** implement the rest ! */
-    //     return false;
-    // }
-
-    bool NoWallsCloseToVirus(List<TileType>[,] grid)
+    bool NoWallsCloseToDragon(List<TileType>[,] grid)
     {
         /*** implement the rest ! */
-        foreach (var pos in pos_viruses)
+        foreach (var pos in pos_dragons)
         {
             int x = pos[0];
             int y = pos[1];
@@ -567,7 +399,7 @@ public int GetNumberOfDragons()
             {
                 for (int j = -1; j <= 1; j++)
                 {
-                    if (i == 0 && j == 0) continue; // Skip the virus position itself
+                    if (i == 0 && j == 0) continue;
 
                     int checkX = x + i;
                     int checkY = y + j;
@@ -585,9 +417,9 @@ public int GetNumberOfDragons()
                 if (wallNearby) break;
             }
 
-            if (!wallNearby) return true; // No wall found near this virus
+            if (!wallNearby) return true;
         }
-        return false; // Walls are found near all viruses
+        return false;
     }
 
 
@@ -602,7 +434,7 @@ public int GetNumberOfDragons()
         grid[w, l] = new List<TileType> { t };
 
 		// note that we negate the functions here i.e., check if we are consistent with the constraints we want
-        bool areWeConsistent = !DoWeHaveTooFewWallsORWaterORDrug(grid) && !DoWeHaveTooManyInteriorWallsORWaterORDrug(grid) && !TooLongWall(grid) && !NoWallsCloseToVirus(grid);
+        bool areWeConsistent = !DoWeHaveTooFewWallsORWaterORDrug(grid) && !DoWeHaveTooManyInteriorWallsORWaterORDrug(grid) && !TooLongWall(grid) && !NoWallsCloseToDragon(grid);
 
         grid[w, l] = new List<TileType>();
         grid[w, l].AddRange(old_assignment);
@@ -983,8 +815,6 @@ public int GetNumberOfDragons()
     {
         GetComponent<Renderer>().material.color = Color.grey; // ground plane will be grey
 
-        // place character at random position (wr, lr) in terms of grid coordinates (integers)
-        // make sure that this random position is a FLOOR tile (not wall, drug, or virus)
         int wr = 0;
         int lr = 0;
         while (true) // try until a valid position is sampled
@@ -996,24 +826,17 @@ public int GetNumberOfDragons()
             {
                 float x = bounds.min[0] + (float)wr * (bounds.size[0] / (float)width);
                 float z = bounds.min[2] + (float)lr * (bounds.size[2] / (float)length);
-                // fps_player_obj = Instantiate(fps_prefab);
-                fps_player_obj = fps_prefab;
-                fps_player_obj.name = "PLAYER";
-                // character is placed above the level so that in the beginning, he appears to fall down onto the maze
-                fps_player_obj.transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
-                // Print the player position
-                //Debug.Log("Player position: " + fps_player_obj.transform.position);
-                fps_player_obj.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-                createdGameObjs.Add(fps_player_obj);
-                ObjectData fpsPlayerData = new ObjectData("FPSPlayer", fps_player_obj.transform.position, fps_player_obj.transform.rotation, fps_player_obj.transform.localScale);
-                objDetails.Add(fpsPlayerData); 
+                player_obj = player_prefab;
+                player_obj.name = "PLAYER";
+                player_obj.transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
+                player_obj.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+                createdGameObjs.Add(player_obj);
+                ObjectData PlayerData = new ObjectData("Player", player_obj.transform.position, player_obj.transform.rotation, player_obj.transform.localScale);
+                objDetails.Add(PlayerData); 
                 break;
             }
         }
 
-        // place an exit from the maze at location (wee, lee) in terms of grid coordinates (integers)
-        // destroy the wall segment there - the grid will be used to place a house
-        // the exist will be placed as far as away from the character (yet, with some randomness, so that it's not always located at the corners)
         int max_dist = -1;
         int wee = -1;
         int lee = -1;
@@ -1053,19 +876,6 @@ public int GetNumberOfDragons()
             }
         }
 
-
-        // *** YOU NEED TO COMPLETE THIS PART OF THE FUNCTION  ***
-        // implement an algorithm that checks whether
-        // all paths between the player at (wr,lr) and the exit (wee, lee)
-        // are blocked by walls. i.e., there's no way to get to the exit!
-        // if this is the case, you must guarantee that there is at least 
-        // one accessible path (any path) from the initial player position to the exit
-        // by removing a few wall blocks (removing all of them is not acceptable!)
-        // this is done as a post-processing step after the CSP solution.
-        // It might be case that some constraints might be violated by this
-        // post-processing step - this is OK.
-        
-        /*** implement what is described above ! */
         Vector2Int player_station_pos = new Vector2Int(wr, lr);
         Vector2Int exit_pos = new Vector2Int(wee, lee);
         bool isPath = implAStarAlgo(player_station_pos, exit_pos, solution);
@@ -1083,11 +893,6 @@ public int GetNumberOfDragons()
                 isPath = implAStarAlgo(player_station_pos, exit_pos, solution);
             }
         }
-
-
-        // the rest of the code creates the scenery based on the grid state 
-        // you don't need to modify this code (unless you want to replace the virus
-        // or other prefabs with something else you like)
         int w = 0;
         for (float x = bounds.min[0]; x < bounds.max[0]; x += bounds.size[0] / (float)width - 1e-6f, w++)
         {
@@ -1100,25 +905,25 @@ public int GetNumberOfDragons()
                 float y = bounds.min[1];
                 if ((w == wee) && (l == lee)) // this is the exit
                 {
-                    GameObject house = Instantiate(house_prefab, new Vector3(0, 0, 0), Quaternion.identity);
-                    house.name = "HOUSE";
-                    house.transform.position = new Vector3(x + 0.5f, y, z + 0.5f);
+                    GameObject endZone = Instantiate(end_zone_prefab, new Vector3(0, 0, 0), Quaternion.identity);
+                    endZone.name = "ENDZONE";
+                    endZone.transform.position = new Vector3(x + 0.5f, y, z + 0.5f);
                     if (l == 0)
-                        house.transform.Rotate(0.0f, 270.0f, 0.0f);
+                        endZone.transform.Rotate(0.0f, 270.0f, 0.0f);
                     else if (w == 0)
-                        house.transform.Rotate(0.0f, 0.0f, 0.0f);
+                        endZone.transform.Rotate(0.0f, 0.0f, 0.0f);
                     else if (l == length - 1)
-                        house.transform.Rotate(0.0f, 90.0f, 0.0f);
+                        endZone.transform.Rotate(0.0f, 90.0f, 0.0f);
                     else if (w == width - 1)
-                        house.transform.Rotate(0.0f, 180.0f, 0.0f);
+                        endZone.transform.Rotate(0.0f, 180.0f, 0.0f);
 
-                    house.AddComponent<BoxCollider>();
-                    house.GetComponent<BoxCollider>().isTrigger = true;
-                    house.GetComponent<BoxCollider>().size = new Vector3(3.0f, 3.0f, 3.0f);
-                    house.AddComponent<House>();
-                    ObjectData houseData = new ObjectData("House", house.transform.position, house.transform.rotation, house.transform.localScale);
-                    objDetails.Add(houseData);
-                    createdGameObjs.Add(house);
+                    endZone.AddComponent<BoxCollider>();
+                    endZone.GetComponent<BoxCollider>().isTrigger = true;
+                    endZone.GetComponent<BoxCollider>().size = new Vector3(3.0f, 3.0f, 3.0f);
+                    endZone.AddComponent<EndZone>();
+                    ObjectData endZoneData = new ObjectData("House", endZone.transform.position, endZone.transform.rotation, endZone.transform.localScale);
+                    objDetails.Add(endZoneData);
+                    createdGameObjs.Add(endZone);
                 }
                 else if (solution[w, l][0] == TileType.WALL)
                 {
@@ -1133,83 +938,62 @@ public int GetNumberOfDragons()
                     ObjectData wallData = new ObjectData("Wall", cube.transform.position, cube.transform.rotation, cube.transform.localScale);
                     objDetails.Add(wallData);
                 }
-                else if (solution[w, l][0] == TileType.VIRUS)
+                else if (solution[w, l][0] == TileType.DRAGON)
                 {
-                    GameObject virus = Instantiate(virus_prefab, new Vector3(0, 0, 0), Quaternion.identity);
-                    virus.name = "COVID";
-                    virus.transform.position = new Vector3(x + 0.5f, y + Random.Range(1.0f, storey_height / 2.0f), z + 0.5f);
+                    GameObject dragon = Instantiate(dragon_prefab, new Vector3(0, 0, 0), Quaternion.identity);
+                    dragon.name = "SOULEATER";
+                    dragon.transform.position = new Vector3(x + 0.5f, y + Random.Range(1.0f, storey_height / 2.0f), z + 0.5f);
 
-                    virus.AddComponent<Virus>();
-                    Virus virusScript = virus.GetComponent<Virus>();
-                    virusScript.maxHeight = storey_height / 4.0f;
-                    virusMaxHeight = storey_height / 4.0f;
-
-                    virus.GetComponent<Rigidbody>().mass = 10000;
-                    ObjectData virusData = new ObjectData("Virus", virus.transform.position, virus.transform.rotation, virus.transform.localScale);
-                    objDetails.Add(virusData);
-                    createdGameObjs.Add(virus);
+                    dragon.AddComponent<Dragon>();
+                    Dragon dragonScript = dragon.GetComponent<Dragon>();
+                    dragonScript.maxHeight = storey_height / 4.0f;
+                    dragonMaxHeight = storey_height / 4.0f;
+                    dragon.GetComponent<Rigidbody>().mass = 10000;
+                    ObjectData dragonData = new ObjectData("Dragon", dragon.transform.position, dragon.transform.rotation, dragon.transform.localScale);
+                    objDetails.Add(dragonData);
+                    createdGameObjs.Add(dragon);
                 }
-                else if (solution[w, l][0] == TileType.DRUG)
+                else if (solution[w, l][0] == TileType.GEM)
                 {
-                    // GameObject capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-                    // capsule.name = "DRUG";
-                    // capsule.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
-                    // capsule.transform.position = new Vector3(x + 0.5f, y + Random.Range(1.0f, storey_height / 2.0f), z + 0.5f);
-                    // capsule.GetComponent<Renderer>().material.color = Color.green;
-                    // capsule.AddComponent<Drug>();
-                    // CapsuleCollider capsuleCollider = capsule.GetComponent<CapsuleCollider>();
-                    // capsuleCollider.center = new Vector3(0, 0, 0);
-                    // capsuleCollider.height = 1 / capsule.transform.localScale.y; // Adjusting for the local scale
-                    // capsuleCollider.radius = 1 / capsule.transform.localScale.x;
-                    // createdGameObjs.Add(capsule);
-                    // ObjectData capsuleData = new ObjectData("Capsule", capsule.transform.position, capsule.transform.rotation, capsule.transform.localScale);
-                    // objDetails.Add(capsuleData);
+                    GameObject gem = Instantiate(gem_prefab, new Vector3(0, 0, 0), Quaternion.identity);
+                    gem.name = "GEM";
+                    gem.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+                    gem.transform.position = new Vector3(x, y + 1.0f, z);
+                    gem.transform.rotation = Quaternion.Euler(-90f, 45f, 0f);
 
-                    GameObject capsule = Instantiate(gem_prefab, new Vector3(0, 0, 0), Quaternion.identity);
-                    capsule.name = "DRUG";
-                    capsule.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
-                    capsule.transform.position = new Vector3(x, y + 1.0f, z);
-                    capsule.transform.rotation = Quaternion.Euler(-90f, 45f, 0f);
-
-                    Rigidbody rb = capsule.AddComponent<Rigidbody>();
+                    Rigidbody rb = gem.AddComponent<Rigidbody>();
                     rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
+                    // rb.mass = 1;
                     rb.useGravity = false;
+                    // rb.isKinematic = true;
                     
-                    capsule.GetComponent<Renderer>().material.color = Color.green;
-                    capsule.AddComponent<Drug>();
-                    createdGameObjs.Add(capsule);
-                    ObjectData capsuleData = new ObjectData("Capsule", capsule.transform.position, capsule.transform.rotation, capsule.transform.localScale);
-                    objDetails.Add(capsuleData);
+                    gem.GetComponent<Renderer>().material.color = Color.green;
+                    gem.AddComponent<Gem>();
+                    createdGameObjs.Add(gem);
+                    ObjectData gemData = new ObjectData("Gem", gem.transform.position, gem.transform.rotation, gem.transform.localScale);
+                    objDetails.Add(gemData);
                 }
-                else if (solution[w, l][0] == TileType.WATER)
+                else if (solution[w, l][0] == TileType.FIRE)
                 {
-                    GameObject water = Instantiate(water_prefab, new Vector3(0, 0, 0), Quaternion.identity);
-                    water.name = "WATER";
-                    water.transform.localScale = new Vector3(1.0f * bounds.size[0] / (float)width, 6.0f, 1.0f * bounds.size[2] / (float)length);
-                    water.transform.position = new Vector3(x + 0.5f, y + 0.1f, z + 0.5f);
-                    ObjectData waterData = new ObjectData("Water", water.transform.position, water.transform.rotation, water.transform.localScale);
-                    objDetails.Add(waterData);
-                    createdGameObjs.Add(water);
+                    GameObject fire = Instantiate(fire_prefab, new Vector3(0, 0, 0), Quaternion.identity);
+                    fire.name = "FIRE";
+                    fire.transform.localScale = new Vector3(1.0f * bounds.size[0] / (float)width, 6.0f, 1.0f * bounds.size[2] / (float)length);
+                    fire.transform.position = new Vector3(x + 0.5f, y + 0.1f, z + 0.5f);
+                    ObjectData fireData = new ObjectData("Fire", fire.transform.position, fire.transform.rotation, fire.transform.localScale);
+                    objDetails.Add(fireData);
+                    createdGameObjs.Add(fire);
 
-                    // GameObject water = Instantiate(water_prefab, new Vector3(0, 0, 0), Quaternion.identity);
-                    // water.name = "WATER";
-                    // water.transform.localScale = new Vector3( bounds.size[0] / (float)width, 1.0f, bounds.size[2] / (float)length);
-                    // water.transform.position = new Vector3(x + 0.5f, y + 0.1f, z + 0.5f);
-                    // ObjectData waterData = new ObjectData("Water", water.transform.position, water.transform.rotation, water.transform.localScale);
-                    // objDetails.Add(waterData);
-                    // createdGameObjs.Add(water);
-
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    cube.name = "WATER_BOX";
-                    cube.transform.localScale = new Vector3(bounds.size[0] / (float)width, storey_height / 20.0f, bounds.size[2] / (float)length);
-                    cube.transform.position = new Vector3(x + 0.5f, y, z + 0.5f);
-                    cube.GetComponent<Renderer>().material.color = Color.grey;
-                    cube.GetComponent<BoxCollider>().size = new Vector3(1.1f, 20.0f * storey_height, 1.1f);
-                    cube.GetComponent<BoxCollider>().isTrigger = true;
-                    cube.AddComponent<Water>();
-                    ObjectData WaterBoxData = new ObjectData("WaterBox", cube.transform.position, cube.transform.rotation, cube.transform.localScale);
+                    GameObject fire_place = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    fire_place.name = "FIRE_PLACE";
+                    fire_place.transform.localScale = new Vector3(bounds.size[0] / (float)width, storey_height / 20.0f, bounds.size[2] / (float)length);
+                    fire_place.transform.position = new Vector3(x + 0.5f, y, z + 0.5f);
+                    fire_place.GetComponent<Renderer>().material.color = Color.grey;
+                    fire_place.GetComponent<BoxCollider>().size = new Vector3(1.1f, 20.0f * storey_height, 1.1f);
+                    fire_place.GetComponent<BoxCollider>().isTrigger = true;
+                    fire_place.AddComponent<Fire>();
+                    ObjectData WaterBoxData = new ObjectData("FireBox", fire_place.transform.position, fire_place.transform.rotation, fire_place.transform.localScale);
                     objDetails.Add(WaterBoxData);
-                    createdGameObjs.Add(cube);
+                    createdGameObjs.Add(fire_place);
                 }
             }
         }
@@ -1226,39 +1010,26 @@ public int GetNumberOfDragons()
             } 
             while (solution[randomW, randomL][0] != TileType.FLOOR); // Ensure the spot is a floor tile
 
-            GameObject capsule = Instantiate(gem_prefab, new Vector3(0, 0, 0), Quaternion.identity);
-            capsule.name = "DRUG";
+            GameObject gem = Instantiate(gem_prefab, new Vector3(0, 0, 0), Quaternion.identity);
+            gem.name = "GEM";
             float x = bounds.min[0] + (float)randomW * (bounds.size[0] / (float)width);
             float z = bounds.min[2] + (float)randomL * (bounds.size[2] / (float)length);
-            capsule.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
-            capsule.transform.position = new Vector3(x, bounds.min[1] + 1.0f, z);
-            capsule.transform.rotation = Quaternion.Euler(-90f, 45f, 0f);
-            //capsule.transform.position = new Vector3(x, bounds.min[1] + 1.0f, z); // Adjust the Y coordinate as needed
-            //capsule.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f); // Adjust the scale as needed
-            Rigidbody rb = capsule.AddComponent<Rigidbody>();
+            gem.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+            gem.transform.position = new Vector3(x, bounds.min[1] + 1.0f, z);
+            gem.transform.rotation = Quaternion.Euler(-90f, 45f, 0f);
+            Rigidbody rb = gem.AddComponent<Rigidbody>();
             rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
             rb.useGravity = false;
-            capsule.GetComponent<Renderer>().material.color = Color.green;
-            capsule.AddComponent<Drug>();
+            gem.GetComponent<Renderer>().material.color = Color.green;
+            gem.AddComponent<Gem>();
 
-            createdGameObjs.Add(capsule);
-            ObjectData capsuleData = new ObjectData("Capsule", capsule.transform.position, capsule.transform.rotation, capsule.transform.localScale);
-            objDetails.Add(capsuleData);
+            createdGameObjs.Add(gem);
+            ObjectData gemData = new ObjectData("Capsule", gem.transform.position, gem.transform.rotation, gem.transform.localScale);
+            objDetails.Add(gemData);
         }
     }
-
-
-    
-    // *** YOU NEED TO COMPLETE THIS PART OF THE FUNCTION JUST TO ADD SOUNDS ***
-    // YOU MAY CHOOSE ANY SHORT SOUNDS (<2 sec) YOU WANT FOR A VIRUS HIT, A VIRUS INFECTION,
-    // GETTING INTO THE WATER, AND REACHING THE EXIT
-    // note: you may also change other scripts/functions to add sound functionality,
-    // along with the functionality for the starting the level, or repeating it
     public void PlayAgain()
     {
-        // Reload the current scene to start over with a new procedural generation
-        // play_again_canvas.enabled = false;
-        // StartCoroutine(PlayAgainCoroutine());
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
@@ -1273,18 +1044,6 @@ public int GetNumberOfDragons()
         InitializeLevel("reset");
     }
 
-    public void UpdateVirusReferencesToPlayer()
-    {
-        Virus[] viruses = FindObjectsOfType<Virus>();
-
-        foreach (Virus virus in viruses)
-        {
-            virus.UpdatePlayerReference(fps_player_obj);
-        }
-    }
-
-
-
     public void TryLevelAgain()
     {
         // try_again_canvas.enabled = false;
@@ -1297,35 +1056,6 @@ public int GetNumberOfDragons()
         recreateSameLevel();
         yield return new WaitForSeconds(1.0f);
     }
-
-    // public void SolveCanvas()
-    // {
-    //     solve_canvas.enabled = true;
-    //     // StartCoroutine(TryAgainCoroutine());
-    //     // recreateSameLevel();
-    // }
-
-    // public void CheckAnswer()
-    // {
-    //     int userAnswer;
-
-    //     if (int.TryParse(answerInput.text, out userAnswer))
-    //     {
-    //         if (userAnswer == correctAnswer)
-    //         {
-    //             successText.text = "Success! You got it right!";
-    //             PlayAgain();
-    //         }
-    //         else
-    //         {
-    //             successText.text = "Try again. Incorrect answer.";
-    //         }
-    //     }
-    //     else
-    //     {
-    //         successText.text = "Invalid input. Please enter a number.";
-    //     }
-    // }
 
     private void recreateSameLevel(){
         InitializeLevel("tryAgain");
@@ -1350,52 +1080,50 @@ public int GetNumberOfDragons()
             text_box.GetComponent<Text>().text = "";
             startAgainCanvas.enabled = true;
 
-            if (fps_player_obj != null)
+            if (player_obj != null)
             {
                 GameObject grave = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 grave.name = "GRAVE";
                 grave.transform.localScale = new Vector3(bounds.size[0] / (float)width, 2.0f * storey_height, bounds.size[2] / (float)length);
-                grave.transform.position = fps_player_obj.transform.position;
+                grave.transform.position = player_obj.transform.position;
                 grave.GetComponent<Renderer>().material.color = Color.black;
                 createdGameObjs.Add(grave);
-                if (fps_player_obj != null){
-                    Camera playerCam = fps_player_obj.GetComponentInChildren<Camera>();
+                if (player_obj != null){
+                    Camera playerCam = player_obj.GetComponentInChildren<Camera>();
                     if (playerCam != null)
                     {
                         Object.Destroy(playerCam.gameObject);
                     }
                 }
-                Object.Destroy(fps_player_obj);
+                Object.Destroy(player_obj);
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
-                // try_again_canvas.enabled = true;                
             }
 
             return;
         }
-        if (player_entered_house) // the player suceeds here, variable manipulated by House.cs
+        if (player_entered_house)
         {
             PlaySoundWithLimit(win_game, 1.5f);
             
-            if (virus_landed_on_player_recently)
-                text_box.GetComponent<Text>().text = "";  //Washed it off at home! Success!!!
+            if (dragon_landed_on_player_recently)
+                text_box.GetComponent<Text>().text = "";
             else{
-                text_box.GetComponent<Text>().text = ""; //Success!!!
+                text_box.GetComponent<Text>().text = "";
             }
-            if (fps_player_obj != null){
-                Camera playerCam = fps_player_obj.GetComponentInChildren<Camera>();
+            if (player_obj != null){
+                Camera playerCam = player_obj.GetComponentInChildren<Camera>();
                 if (playerCam != null)
                 {
                     Object.Destroy(playerCam.gameObject);
                 }
             }
             
-            Object.Destroy(fps_player_obj);
+            Object.Destroy(player_obj);
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-            // solve_canvas.enabled = true;
 
-            if(result == (coefficient_of_gems * numberOfGemsCollected + coefficient_of_dragons * numberOfDragonsDefeated))
+            if(result == coefficient_of_gems*numberOfGemsCollected + coefficient_of_dragons*numberOfDragonsDefeated)
             {
             DisplayEndGameSuccessResults();
             successCanvas.enabled = true; 
@@ -1411,78 +1139,15 @@ public int GetNumberOfDragons()
             text_box.GetComponent<Text>().text = "Crack the code to find your home!";            
         }
 
-        // virus hits the players (boolean variable is manipulated by Virus.cs)
-        // if (virus_landed_on_player_recently)
-        // {
-        //     PlaySoundWithLimit(virus_sound, 1.5f);
-        //     float time_since_virus_landed = Time.time - timestamp_virus_landed;
-        //     if (time_since_virus_landed > 5.0f)
-        //     {
-        //         player_health -= Random.Range(0.25f, 0.5f) * (float)num_virus_hit_concurrently;
-        //         player_health = Mathf.Max(player_health, 0.0f);
-        //         if (num_virus_hit_concurrently > 1)
-        //             text_box.GetComponent<Text>().text = "Ouch! Infected by " + num_virus_hit_concurrently + " viruses";
-        //         else
-        //             text_box.GetComponent<Text>().text = "Ouch! Infected by a virus";
-        //         timestamp_last_msg = Time.time;
-        //         timestamp_virus_landed = float.MaxValue;
-        //         virus_landed_on_player_recently = false;
-        //         num_virus_hit_concurrently = 0;
-        //     }
-        //     else
-        //     {
-        //         if (num_virus_hit_concurrently == 1)
-        //             text_box.GetComponent<Text>().text = "A virus landed on you. Infection in " + (5.0f - time_since_virus_landed).ToString("0.0") + " seconds. Find water or drug!";
-        //         else
-        //             text_box.GetComponent<Text>().text = num_virus_hit_concurrently + " viruses landed on you. Infection in " + (5.0f - time_since_virus_landed).ToString("0.0") + " seconds. Find water or drug!";
-        //     }
-        // }
-
-        // drug picked by the player  (boolean variable is manipulated by Drug.cs)
-        if (drug_landed_on_player_recently)
+        if (gem_landed_on_player_recently)
         {
             PlaySoundWithLimit(got_gem, 1.5f);
-            // if (player_health < 0.999f || virus_landed_on_player_recently)
-            //     text_box.GetComponent<Text>().text = "Phew! The new gem worked wonders!";
-            // else
-            //     text_box.GetComponent<Text>().text = "";
             timestamp_last_msg = Time.time;
-            // player_health += Random.Range(0.25f, 0.75f);
-            // player_health = Mathf.Min(player_health, 1.0f);
-            drug_landed_on_player_recently = false;
-            timestamp_virus_landed = float.MaxValue;
-            virus_landed_on_player_recently = false;
-            num_virus_hit_concurrently = 0;
+            gem_landed_on_player_recently = false;
+            timestamp_dragon_landed = float.MaxValue;
+            dragon_landed_on_player_recently = false;
+            num_dragon_hit_concurrently = 0;
         }
-
-        // splashed on water  (boolean variable is manipulated by Water.cs)
-        // if (player_is_on_water)
-        // {
-        //     PlaySoundWithLimit(water_sound, 1.5f);
-        //     if (virus_landed_on_player_recently)
-        //         text_box.GetComponent<Text>().text = "Phew! Washed it off!";
-        //     timestamp_last_msg = Time.time;
-        //     timestamp_virus_landed = float.MaxValue;
-        //     virus_landed_on_player_recently = false;
-        //     num_virus_hit_concurrently = 0;
-        // }
-
-        // update scroll bar (not a very conventional manner to create a health bar, but whatever)
-        // scroll_bar.GetComponent<Scrollbar>().size = player_health;
-        // if (player_health < 0.5f)
-        // {
-        //     ColorBlock cb = scroll_bar.GetComponent<Scrollbar>().colors;
-        //     cb.disabledColor = new Color(1.0f, 0.0f, 0.0f);
-        //     scroll_bar.GetComponent<Scrollbar>().colors = cb;
-        // }
-        // else
-        // {
-        //     ColorBlock cb = scroll_bar.GetComponent<Scrollbar>().colors;
-        //     cb.disabledColor = new Color(0.0f, 1.0f, 0.25f);
-        //     scroll_bar.GetComponent<Scrollbar>().colors = cb;
-        // }
-
-        
     }
 }
 
